@@ -1,0 +1,22 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1024" height="1024" viewBox="0 0 1024 1024">
+  <defs>
+    <linearGradient id="bubbleGrad" x1="0.3" y1="0" x2="0.7" y2="1">
+      <stop offset="0%" stop-color="#D4A04E"/>
+      <stop offset="100%" stop-color="#C0873A"/>
+    </linearGradient>
+  </defs>
+  <!-- Chat bubble: rounded rectangle with a subtle tail at bottom-left -->
+  <path d="
+    M 310,280
+    Q 310,220 370,220
+    L 654,220
+    Q 714,220 714,280
+    L 714,560
+    Q 714,620 654,620
+    L 430,620
+    L 360,700
+    L 370,620
+    Q 310,620 310,560
+    Z
+  " fill="url(#bubbleGrad)"/>
+</svg>

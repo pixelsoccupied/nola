@@ -1,0 +1,640 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 77;
+	objects = {
+
+/* Begin PBXBuildFile section */
+		EC2DAF122F80895A00957914 /* MLXLLM in Frameworks */ = {isa = PBXBuildFile; productRef = EC2DAF112F80895A00957914 /* MLXLLM */; };
+		EC2DAF142F80896300957914 /* MLXLMCommon in Frameworks */ = {isa = PBXBuildFile; productRef = EC2DAF132F80896300957914 /* MLXLMCommon */; };
+		EC2DAF162F80898B00957914 /* MLXEmbedders in Frameworks */ = {isa = PBXBuildFile; productRef = EC2DAF152F80898B00957914 /* MLXEmbedders */; };
+		EC2DAF182F80898B00957914 /* MLXVLM in Frameworks */ = {isa = PBXBuildFile; productRef = EC2DAF172F80898B00957914 /* MLXVLM */; };
+/* End PBXBuildFile section */
+
+/* Begin PBXContainerItemProxy section */
+		EC23A9AA2F80747800802F50 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = EC23A9922F80747600802F50 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = EC23A9992F80747600802F50;
+			remoteInfo = Nola;
+		};
+		EC23A9B42F80747800802F50 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = EC23A9922F80747600802F50 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = EC23A9992F80747600802F50;
+			remoteInfo = Nola;
+		};
+/* End PBXContainerItemProxy section */
+
+/* Begin PBXFileReference section */
+		EC23A99A2F80747700802F50 /* Nola.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Nola.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		EC23A9A92F80747800802F50 /* NolaTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = NolaTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		EC23A9B32F80747800802F50 /* NolaUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = NolaUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+/* End PBXFileReference section */
+
+/* Begin PBXFileSystemSynchronizedRootGroup section */
+		EC23A99C2F80747700802F50 /* Nola */ = {
+			isa = PBXFileSystemSynchronizedRootGroup;
+			path = Nola;
+			sourceTree = "<group>";
+		};
+		EC23A9AC2F80747800802F50 /* NolaTests */ = {
+			isa = PBXFileSystemSynchronizedRootGroup;
+			path = NolaTests;
+			sourceTree = "<group>";
+		};
+		EC23A9B62F80747800802F50 /* NolaUITests */ = {
+			isa = PBXFileSystemSynchronizedRootGroup;
+			path = NolaUITests;
+			sourceTree = "<group>";
+		};
+/* End PBXFileSystemSynchronizedRootGroup section */
+
+/* Begin PBXFrameworksBuildPhase section */
+		EC23A9972F80747600802F50 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				EC2DAF122F80895A00957914 /* MLXLLM in Frameworks */,
+				EC2DAF162F80898B00957914 /* MLXEmbedders in Frameworks */,
+				EC2DAF142F80896300957914 /* MLXLMCommon in Frameworks */,
+				EC2DAF182F80898B00957914 /* MLXVLM in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		EC23A9A62F80747800802F50 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		EC23A9B02F80747800802F50 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXFrameworksBuildPhase section */
+
+/* Begin PBXGroup section */
+		EC23A9912F80747600802F50 = {
+			isa = PBXGroup;
+			children = (
+				EC23A99C2F80747700802F50 /* Nola */,
+				EC23A9AC2F80747800802F50 /* NolaTests */,
+				EC23A9B62F80747800802F50 /* NolaUITests */,
+				EC2DAF102F80895A00957914 /* Frameworks */,
+				EC23A99B2F80747700802F50 /* Products */,
+			);
+			sourceTree = "<group>";
+		};
+		EC23A99B2F80747700802F50 /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				EC23A99A2F80747700802F50 /* Nola.app */,
+				EC23A9A92F80747800802F50 /* NolaTests.xctest */,
+				EC23A9B32F80747800802F50 /* NolaUITests.xctest */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		EC2DAF102F80895A00957914 /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+			);
+			name = Frameworks;
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXNativeTarget section */
+		EC23A9992F80747600802F50 /* Nola */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = EC23A9BD2F80747800802F50 /* Build configuration list for PBXNativeTarget "Nola" */;
+			buildPhases = (
+				EC23A9962F80747600802F50 /* Sources */,
+				EC23A9972F80747600802F50 /* Frameworks */,
+				EC23A9982F80747600802F50 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			fileSystemSynchronizedGroups = (
+				EC23A99C2F80747700802F50 /* Nola */,
+			);
+			name = Nola;
+			packageProductDependencies = (
+				EC2DAF112F80895A00957914 /* MLXLLM */,
+				EC2DAF132F80896300957914 /* MLXLMCommon */,
+				EC2DAF152F80898B00957914 /* MLXEmbedders */,
+				EC2DAF172F80898B00957914 /* MLXVLM */,
+			);
+			productName = Nola;
+			productReference = EC23A99A2F80747700802F50 /* Nola.app */;
+			productType = "com.apple.product-type.application";
+		};
+		EC23A9A82F80747800802F50 /* NolaTests */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = EC23A9C02F80747800802F50 /* Build configuration list for PBXNativeTarget "NolaTests" */;
+			buildPhases = (
+				EC23A9A52F80747800802F50 /* Sources */,
+				EC23A9A62F80747800802F50 /* Frameworks */,
+				EC23A9A72F80747800802F50 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				EC23A9AB2F80747800802F50 /* PBXTargetDependency */,
+			);
+			fileSystemSynchronizedGroups = (
+				EC23A9AC2F80747800802F50 /* NolaTests */,
+			);
+			name = NolaTests;
+			packageProductDependencies = (
+			);
+			productName = NolaTests;
+			productReference = EC23A9A92F80747800802F50 /* NolaTests.xctest */;
+			productType = "com.apple.product-type.bundle.unit-test";
+		};
+		EC23A9B22F80747800802F50 /* NolaUITests */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = EC23A9C32F80747800802F50 /* Build configuration list for PBXNativeTarget "NolaUITests" */;
+			buildPhases = (
+				EC23A9AF2F80747800802F50 /* Sources */,
+				EC23A9B02F80747800802F50 /* Frameworks */,
+				EC23A9B12F80747800802F50 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				EC23A9B52F80747800802F50 /* PBXTargetDependency */,
+			);
+			fileSystemSynchronizedGroups = (
+				EC23A9B62F80747800802F50 /* NolaUITests */,
+			);
+			name = NolaUITests;
+			packageProductDependencies = (
+			);
+			productName = NolaUITests;
+			productReference = EC23A9B32F80747800802F50 /* NolaUITests.xctest */;
+			productType = "com.apple.product-type.bundle.ui-testing";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		EC23A9922F80747600802F50 /* Project object */ = {
+			isa = PBXProject;
+			attributes = {
+				BuildIndependentTargetsInParallel = 1;
+				LastSwiftUpdateCheck = 2630;
+				LastUpgradeCheck = 2630;
+				TargetAttributes = {
+					EC23A9992F80747600802F50 = {
+						CreatedOnToolsVersion = 26.3;
+					};
+					EC23A9A82F80747800802F50 = {
+						CreatedOnToolsVersion = 26.3;
+						TestTargetID = EC23A9992F80747600802F50;
+					};
+					EC23A9B22F80747800802F50 = {
+						CreatedOnToolsVersion = 26.3;
+						TestTargetID = EC23A9992F80747600802F50;
+					};
+				};
+			};
+			buildConfigurationList = EC23A9952F80747600802F50 /* Build configuration list for PBXProject "Nola" */;
+			developmentRegion = en;
+			hasScannedForEncodings = 0;
+			knownRegions = (
+				en,
+				Base,
+			);
+			mainGroup = EC23A9912F80747600802F50;
+			minimizedProjectReferenceProxies = 1;
+			packageReferences = (
+				EC2DAEE12F8086B900957914 /* XCRemoteSwiftPackageReference "mlx-swift-lm" */,
+			);
+			preferredProjectObjectVersion = 77;
+			productRefGroup = EC23A99B2F80747700802F50 /* Products */;
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (
+				EC23A9992F80747600802F50 /* Nola */,
+				EC23A9A82F80747800802F50 /* NolaTests */,
+				EC23A9B22F80747800802F50 /* NolaUITests */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXResourcesBuildPhase section */
+		EC23A9982F80747600802F50 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		EC23A9A72F80747800802F50 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		EC23A9B12F80747800802F50 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXResourcesBuildPhase section */
+
+/* Begin PBXSourcesBuildPhase section */
+		EC23A9962F80747600802F50 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		EC23A9A52F80747800802F50 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		EC23A9AF2F80747800802F50 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin PBXTargetDependency section */
+		EC23A9AB2F80747800802F50 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = EC23A9992F80747600802F50 /* Nola */;
+			targetProxy = EC23A9AA2F80747800802F50 /* PBXContainerItemProxy */;
+		};
+		EC23A9B52F80747800802F50 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = EC23A9992F80747600802F50 /* Nola */;
+			targetProxy = EC23A9B42F80747800802F50 /* PBXContainerItemProxy */;
+		};
+/* End PBXTargetDependency section */
+
+/* Begin XCBuildConfiguration section */
+		EC23A9BB2F80747800802F50 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS = YES;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++20";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = dwarf;
+				DEVELOPMENT_TEAM = SRQYX6DXPY;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_TESTABILITY = YES;
+				ENABLE_USER_SCRIPT_SANDBOXING = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu17;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"DEBUG=1",
+					"$(inherited)",
+				);
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				LOCALIZATION_PREFERS_STRING_CATALOGS = YES;
+				MACOSX_DEPLOYMENT_TARGET = 26.2;
+				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
+				MTL_FAST_MATH = YES;
+				ONLY_ACTIVE_ARCH = YES;
+				SDKROOT = macosx;
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = "DEBUG $(inherited)";
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+			};
+			name = Debug;
+		};
+		EC23A9BC2F80747800802F50 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS = YES;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++20";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				DEVELOPMENT_TEAM = SRQYX6DXPY;
+				ENABLE_NS_ASSERTIONS = NO;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_USER_SCRIPT_SANDBOXING = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu17;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				LOCALIZATION_PREFERS_STRING_CATALOGS = YES;
+				MACOSX_DEPLOYMENT_TARGET = 26.2;
+				MTL_ENABLE_DEBUG_INFO = NO;
+				MTL_FAST_MATH = YES;
+				SDKROOT = macosx;
+				SWIFT_COMPILATION_MODE = wholemodule;
+			};
+			name = Release;
+		};
+		EC23A9BE2F80747800802F50 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_STYLE = Automatic;
+				COMBINE_HIDPI_IMAGES = YES;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = SRQYX6DXPY;
+				ENABLE_APP_SANDBOX = NO;
+				ENABLE_HARDENED_RUNTIME = YES;
+				ENABLE_PREVIEWS = YES;
+				ENABLE_USER_SELECTED_FILES = readonly;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = Info.plist;
+				INFOPLIST_KEY_NSHumanReadableCopyright = "";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/../Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = vurttech.Nola;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				REGISTER_APP_GROUPS = YES;
+				STRING_CATALOG_GENERATE_SYMBOLS = YES;
+				SWIFT_APPROACHABLE_CONCURRENCY = YES;
+				SWIFT_DEFAULT_ACTOR_ISOLATION = MainActor;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
+				SWIFT_VERSION = 5.0;
+			};
+			name = Debug;
+		};
+		EC23A9BF2F80747800802F50 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_STYLE = Automatic;
+				COMBINE_HIDPI_IMAGES = YES;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = SRQYX6DXPY;
+				ENABLE_APP_SANDBOX = NO;
+				ENABLE_HARDENED_RUNTIME = YES;
+				ENABLE_PREVIEWS = YES;
+				ENABLE_USER_SELECTED_FILES = readonly;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = Info.plist;
+				INFOPLIST_KEY_NSHumanReadableCopyright = "";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/../Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = vurttech.Nola;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				REGISTER_APP_GROUPS = YES;
+				STRING_CATALOG_GENERATE_SYMBOLS = YES;
+				SWIFT_APPROACHABLE_CONCURRENCY = YES;
+				SWIFT_DEFAULT_ACTOR_ISOLATION = MainActor;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
+				SWIFT_VERSION = 5.0;
+			};
+			name = Release;
+		};
+		EC23A9C12F80747800802F50 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = SRQYX6DXPY;
+				GENERATE_INFOPLIST_FILE = YES;
+				MACOSX_DEPLOYMENT_TARGET = 26.2;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = vurttech.NolaTests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				STRING_CATALOG_GENERATE_SYMBOLS = NO;
+				SWIFT_APPROACHABLE_CONCURRENCY = YES;
+				SWIFT_EMIT_LOC_STRINGS = NO;
+				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
+				SWIFT_VERSION = 5.0;
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/Nola.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/Nola";
+			};
+			name = Debug;
+		};
+		EC23A9C22F80747800802F50 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = SRQYX6DXPY;
+				GENERATE_INFOPLIST_FILE = YES;
+				MACOSX_DEPLOYMENT_TARGET = 26.2;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = vurttech.NolaTests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				STRING_CATALOG_GENERATE_SYMBOLS = NO;
+				SWIFT_APPROACHABLE_CONCURRENCY = YES;
+				SWIFT_EMIT_LOC_STRINGS = NO;
+				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
+				SWIFT_VERSION = 5.0;
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/Nola.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/Nola";
+			};
+			name = Release;
+		};
+		EC23A9C42F80747800802F50 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = SRQYX6DXPY;
+				GENERATE_INFOPLIST_FILE = YES;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = vurttech.NolaUITests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				STRING_CATALOG_GENERATE_SYMBOLS = NO;
+				SWIFT_APPROACHABLE_CONCURRENCY = YES;
+				SWIFT_EMIT_LOC_STRINGS = NO;
+				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
+				SWIFT_VERSION = 5.0;
+				TEST_TARGET_NAME = Nola;
+			};
+			name = Debug;
+		};
+		EC23A9C52F80747800802F50 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = SRQYX6DXPY;
+				GENERATE_INFOPLIST_FILE = YES;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = vurttech.NolaUITests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				STRING_CATALOG_GENERATE_SYMBOLS = NO;
+				SWIFT_APPROACHABLE_CONCURRENCY = YES;
+				SWIFT_EMIT_LOC_STRINGS = NO;
+				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
+				SWIFT_VERSION = 5.0;
+				TEST_TARGET_NAME = Nola;
+			};
+			name = Release;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		EC23A9952F80747600802F50 /* Build configuration list for PBXProject "Nola" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				EC23A9BB2F80747800802F50 /* Debug */,
+				EC23A9BC2F80747800802F50 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		EC23A9BD2F80747800802F50 /* Build configuration list for PBXNativeTarget "Nola" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				EC23A9BE2F80747800802F50 /* Debug */,
+				EC23A9BF2F80747800802F50 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		EC23A9C02F80747800802F50 /* Build configuration list for PBXNativeTarget "NolaTests" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				EC23A9C12F80747800802F50 /* Debug */,
+				EC23A9C22F80747800802F50 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		EC23A9C32F80747800802F50 /* Build configuration list for PBXNativeTarget "NolaUITests" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				EC23A9C42F80747800802F50 /* Debug */,
+				EC23A9C52F80747800802F50 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+/* End XCConfigurationList section */
+
+/* Begin XCRemoteSwiftPackageReference section */
+		EC2DAEE12F8086B900957914 /* XCRemoteSwiftPackageReference "mlx-swift-lm" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/ml-explore/mlx-swift-lm";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 2.31.3;
+			};
+		};
+/* End XCRemoteSwiftPackageReference section */
+
+/* Begin XCSwiftPackageProductDependency section */
+		EC2DAF112F80895A00957914 /* MLXLLM */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = EC2DAEE12F8086B900957914 /* XCRemoteSwiftPackageReference "mlx-swift-lm" */;
+			productName = MLXLLM;
+		};
+		EC2DAF132F80896300957914 /* MLXLMCommon */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = EC2DAEE12F8086B900957914 /* XCRemoteSwiftPackageReference "mlx-swift-lm" */;
+			productName = MLXLMCommon;
+		};
+		EC2DAF152F80898B00957914 /* MLXEmbedders */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = EC2DAEE12F8086B900957914 /* XCRemoteSwiftPackageReference "mlx-swift-lm" */;
+			productName = MLXEmbedders;
+		};
+		EC2DAF172F80898B00957914 /* MLXVLM */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = EC2DAEE12F8086B900957914 /* XCRemoteSwiftPackageReference "mlx-swift-lm" */;
+			productName = MLXVLM;
+		};
+/* End XCSwiftPackageProductDependency section */
+	};
+	rootObject = EC23A9922F80747600802F50 /* Project object */;
+}

@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1024" height="1024" viewBox="0 0 1024 1024">
+  <!-- Small bright circle -->
+  <circle cx="520" cy="380" r="140" fill="#E8B862" opacity="0.45"/>
+  <!-- Intersection glow core -->
+  <circle cx="510" cy="460" r="70" fill="#FFF5E0" opacity="0.2"/>
+</svg>

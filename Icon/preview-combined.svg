@@ -1,0 +1,28 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1024" height="1024" viewBox="0 0 1024 1024">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#2E1F14"/>
+      <stop offset="100%" stop-color="#141210"/>
+    </linearGradient>
+    <clipPath id="macosClip">
+      <rect x="0" y="0" width="1024" height="1024" rx="228" ry="228"/>
+    </clipPath>
+  </defs>
+
+  <g clip-path="url(#macosClip)">
+    <!-- Background -->
+    <rect width="1024" height="1024" fill="url(#bg)"/>
+
+    <!-- Circle 1: Large, bottom-left, warm deep gold -->
+    <circle cx="400" cy="540" r="220" fill="#C0873A" opacity="0.55"/>
+
+    <!-- Circle 2: Medium, top-right, lighter gold -->
+    <circle cx="600" cy="440" r="190" fill="#D4A04E" opacity="0.5"/>
+
+    <!-- Circle 3: Small, center-top, bright gold -->
+    <circle cx="520" cy="380" r="140" fill="#E8B862" opacity="0.45"/>
+
+    <!-- Intersection glow: where all three meet, a bright warm core -->
+    <circle cx="510" cy="460" r="70" fill="#FFF5E0" opacity="0.2"/>
+  </g>
+</svg>
