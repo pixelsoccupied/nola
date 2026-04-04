@@ -211,23 +211,43 @@ struct ChatView: View {
             }
 
             if case .loading = mlxService.loadState {
-                HStack(spacing: 6) {
-                    ProgressView().controlSize(.small)
-                    Text("Loading model…")
-                        .font(.caption)
-                        .foregroundStyle(.tertiary)
+                VStack(spacing: 6) {
+                    if let id = mlxService.activeModelId {
+                        Text(id.components(separatedBy: "/").last ?? id)
+                            .font(.caption.weight(.medium))
+                            .foregroundStyle(.secondary)
+                    }
+                    HStack(spacing: 6) {
+                        ProgressView().controlSize(.small)
+                        Text("Loading model…")
+                            .font(.caption)
+                            .foregroundStyle(.tertiary)
+                    }
                 }
                 .padding(.top, 8)
             }
 
             if case .downloading(let progress) = mlxService.loadState {
-                VStack(spacing: 6) {
+                VStack(spacing: 8) {
+                    if let id = mlxService.activeModelId {
+                        Text(id.components(separatedBy: "/").last ?? id)
+                            .font(.caption.weight(.medium))
+                            .foregroundStyle(.secondary)
+                    }
                     ProgressView(value: progress)
                         .progressViewStyle(.linear)
                         .frame(maxWidth: 300)
-                    Text("Downloading… \(Int(progress * 100))%")
+                    HStack(spacing: 12) {
+                        Text("Downloading… \(Int(progress * 100))%")
+                            .font(.caption)
+                            .foregroundStyle(.tertiary)
+                        Button("Cancel") {
+                            mlxService.cancelLoading()
+                        }
                         .font(.caption)
-                        .foregroundStyle(.tertiary)
+                        .foregroundStyle(.red)
+                        .buttonStyle(.plain)
+                    }
                 }
                 .padding(.top, 8)
             }

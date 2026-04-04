@@ -111,6 +111,13 @@ final class MLXService {
         }
     }
 
+    func cancelLoading() {
+        loadTask?.cancel()
+        loadTask = nil
+        loadState = .idle
+        activeModelId = nil
+    }
+
     // MARK: - Generation
 
     func generate(
