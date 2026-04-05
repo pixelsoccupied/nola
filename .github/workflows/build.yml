@@ -11,6 +11,6 @@ jobs:
     runs-on: macos-26
 
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
       - name: Build
         run: xcodebuild build -project Nola.xcodeproj -scheme Nola -destination 'platform=macOS' CODE_SIGNING_ALLOWED=NO
