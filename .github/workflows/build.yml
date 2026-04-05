@@ -12,5 +12,29 @@ jobs:
 
     steps:
       - uses: actions/checkout@v6
-      - name: Build
-        run: xcodebuild build -project Nola.xcodeproj -scheme Nola -destination 'platform=macOS' CODE_SIGNING_ALLOWED=NO
+
+      - name: Build release
+        run: |
+          xcodebuild build \
+            -project Nola.xcodeproj \
+            -scheme Nola \
+            -configuration Release \
+            -derivedDataPath build/derived \
+            CODE_SIGNING_ALLOWED=NO \
+            -quiet
+
+      - name: Create DMG
+        if: github.event_name == 'push'
+        run: |
+          hdiutil create \
+            -volname "Nola" \
+            -srcfolder build/derived/Build/Products/Release/Nola.app \
+            -ov -format UDZO \
+            Nola.dmg
+
+      - name: Upload DMG
+        if: github.event_name == 'push'
+        uses: actions/upload-artifact@v4
+        with:
+          name: Nola.dmg
+          path: Nola.dmg
