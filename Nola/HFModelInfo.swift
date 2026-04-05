@@ -58,11 +58,6 @@ struct HFModelInfo: Codable, Identifiable, Hashable {
         return String(format: "%.1fB", b)
     }
 
-    var sizeCategory: ModelSize? {
-        guard let b = parameterBillions else { return nil }
-        return ModelSize.from(billions: b)
-    }
-
     /// Estimated memory needed to run this model (rough: ~0.6 GB per billion params for 4-bit)
     var estimatedMemoryGB: Double? {
         guard let b = parameterBillions else { return nil }
@@ -181,28 +176,9 @@ struct ModelLineGroup: Identifiable {
     }
 }
 
-enum ModelSize: String, CaseIterable {
-    case small = "Small"
-    case medium = "Medium"
-    case large = "Large"
-
-    static func from(billions: Double) -> ModelSize {
-        if billions <= 4 { return .small }
-        if billions <= 14 { return .medium }
-        return .large
-    }
-}
-
 enum DeviceCapability {
     static var unifiedMemoryGB: Double {
         Double(ProcessInfo.processInfo.physicalMemory) / 1_073_741_824
     }
 
-    static var recommendedMaxBillions: Double {
-        let mem = unifiedMemoryGB
-        if mem >= 64 { return 70 }
-        if mem >= 32 { return 32 }
-        if mem >= 16 { return 8 }
-        return 4
-    }
 }

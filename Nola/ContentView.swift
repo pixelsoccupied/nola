@@ -102,12 +102,6 @@ struct ContentView: View {
         try? modelContext.save()
     }
 
-    private func deleteConversations(at offsets: IndexSet) {
-        for index in offsets {
-            deleteConversation(conversations[index])
-        }
-    }
-
     // MARK: - Date grouping
 
     private struct ConversationGroup {

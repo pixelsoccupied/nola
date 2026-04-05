@@ -6,7 +6,6 @@ import SwiftUI
 final class ModelManager {
     private(set) var downloadedModels: [DownloadedModel] = []
     private(set) var mlxModels: [DownloadedModel] = []
-    var isScanning = false
 
     private let hfService = HuggingFaceService()
     private let cacheDirectory: URL = {
@@ -31,11 +30,9 @@ final class ModelManager {
     // MARK: - Scanning
 
     func scanDownloadedModels() async {
-        isScanning = true
         let hubDir = cacheDirectory.appendingPathComponent("hub")
         let models = await Self.scanFileSystem(hubDir: hubDir)
         setModels(models)
-        isScanning = false
     }
 
     func deleteModel(_ model: DownloadedModel) throws {
@@ -50,11 +47,6 @@ final class ModelManager {
 
     func isDownloaded(_ modelId: String) -> Bool {
         downloadedModels.contains { $0.id == modelId }
-    }
-
-    var totalStorageUsed: String {
-        let total = downloadedModels.reduce(Int64(0)) { $0 + $1.sizeBytes }
-        return ByteCountFormatter.string(fromByteCount: total, countStyle: .file)
     }
 
     // MARK: - HuggingFace API

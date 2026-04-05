@@ -53,17 +53,7 @@ actor HuggingFaceService {
 
     private var cache: [String: CacheEntry] = [:]
 
-    enum SortOption: String, CaseIterable {
+    enum SortOption: String {
         case trending = "trendingScore"
-        case newest = "lastModified"
-        case popular = "downloads"
-
-        var label: String {
-            switch self {
-            case .trending: return "Trending"
-            case .newest: return "New"
-            case .popular: return "Popular"
-            }
-        }
     }
 }

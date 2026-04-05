@@ -261,14 +261,6 @@ struct ChatView: View {
         }
     }
 
-    private func scrollToBottom(_ proxy: ScrollViewProxy) {
-        if let id = sortedMessages.last?.id {
-            withAnimation(.easeOut(duration: 0.3)) {
-                proxy.scrollTo(id, anchor: .bottom)
-            }
-        }
-    }
-
     // MARK: - Actions
 
     private var canSend: Bool {

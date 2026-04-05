@@ -8,7 +8,6 @@ import SwiftUI
 final class ChatViewModel {
     var streamingContent = ""
     var isGenerating = false
-    var tokensPerSecond: Double = 0
     var generationError: GenerationError?
 
     private var generationTask: Task<Void, Never>?
@@ -53,16 +52,12 @@ final class ChatViewModel {
 
         isGenerating = true
         streamingContent = ""
-        tokensPerSecond = 0
         generationError = nil
 
         conversation.modelId = mlxService.activeModelId
         let chatMessages = buildChatMessages(from: conversation)
 
         generationTask = Task {
-            var tokenCount = 0
-            let startTime = Date()
-
             do {
                 let stream = mlxService.generate(
                     messages: chatMessages,
@@ -70,12 +65,6 @@ final class ChatViewModel {
                 )
                 for try await chunk in stream {
                     streamingContent += chunk
-                    tokenCount += 1
-
-                    let elapsed = Date().timeIntervalSince(startTime)
-                    if elapsed > 0 {
-                        tokensPerSecond = Double(tokenCount) / elapsed
-                    }
                 }
                 assistantMessage.content = streamingContent
             } catch {
