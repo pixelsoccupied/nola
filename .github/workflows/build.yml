@@ -32,9 +32,13 @@ jobs:
             -ov -format UDZO \
             Nola.dmg
 
-      - name: Upload DMG
+      - name: Update latest release
         if: github.event_name == 'push'
-        uses: actions/upload-artifact@v4
+        uses: softprops/action-gh-release@v2
         with:
-          name: Nola.dmg
-          path: Nola.dmg
+          tag_name: latest
+          name: Latest Build
+          body: "Built from `main` at ${{ github.sha }}"
+          files: Nola.dmg
+          prerelease: true
+          make_latest: true
