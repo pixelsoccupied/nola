@@ -11,7 +11,6 @@ final class MLXService {
 
     enum LoadState: Sendable {
         case idle
-        case downloading(progress: Double)
         case loading
         case ready(ModelContainer)
         case error(String)
@@ -20,8 +19,18 @@ final class MLXService {
     private static let lastModelKey = "lastUsedModelId"
     private static let incompatibleKey = "incompatibleModelIds"
 
+    // Current model state — stays .ready during background downloads
     var loadState: LoadState = .idle
     var activeModelId: String?
+
+    // Background download tracking — separate from active model
+    var downloadingModelId: String?
+    var downloadingProgress: Double = 0
+
+    // Completed download waiting to be activated
+    private var pendingContainer: ModelContainer?
+    var pendingModelId: String?
+
     private(set) var incompatibleModels: Set<String> = {
         Set(UserDefaults.standard.stringArray(forKey: incompatibleKey) ?? [])
     }()
@@ -40,6 +49,7 @@ final class MLXService {
     }
 
     private var loadTask: Task<Void, Error>?
+    private var downloadTask: Task<Void, Error>?
 
     var isReady: Bool {
         if case .ready = loadState { return true }
@@ -47,27 +57,35 @@ final class MLXService {
     }
 
     var isLoading: Bool {
-        switch loadState {
-        case .downloading, .loading: return true
-        default: return false
-        }
+        if case .loading = loadState { return true }
+        return false
+    }
+
+    var isDownloading: Bool {
+        downloadingModelId != nil
     }
 
     // MARK: - Model Loading
 
     func loadModel(id: String) async throws {
-        // Cancel any in-progress load
+        let isLocal = await Self.modelExistsLocally(id: id)
+
+        if isLocal {
+            try await loadLocalModel(id: id)
+        } else {
+            try await downloadModel(id: id)
+        }
+    }
+
+    private func loadLocalModel(id: String) async throws {
+        // Cancel any in-progress local load (but NOT background downloads)
         loadTask?.cancel()
         loadTask = nil
 
-        // Evict previous model from memory — only one loaded at a time
-        Memory.cacheLimit = 0  // flush GPU memory pool
-        Memory.cacheLimit = 20 * 1024 * 1024  // restore reasonable cache
-
-        activeModelId = id
-        let isLocal = await Self.modelExistsLocally(id: id)
-        loadState = isLocal ? .loading : .downloading(progress: 0)
+        Memory.cacheLimit = 0
         Memory.cacheLimit = 20 * 1024 * 1024
+        activeModelId = id
+        loadState = .loading
 
         let configuration = ModelConfiguration(id: id)
 
@@ -75,20 +93,12 @@ final class MLXService {
             let container = try await LLMModelFactory.shared.loadContainer(
                 hub: HubApi.default,
                 configuration: configuration
-            ) { progress in
-                Task { @MainActor in
-                    if !isLocal {
-                        self.loadState = .downloading(progress: progress.fractionCompleted)
-                    }
-                }
-            }
+            ) { _ in }
 
             try Task.checkCancellation()
 
-            // Validate chat template before marking ready
             let testMessages: [Chat.Message] = [.user("test")]
-            let testInput = UserInput(chat: testMessages)
-            _ = try await container.prepare(input: testInput)
+            _ = try await container.prepare(input: UserInput(chat: testMessages))
 
             loadState = .ready(container)
             activeModelId = id
@@ -100,22 +110,86 @@ final class MLXService {
         } catch is CancellationError {
             loadState = .idle
         } catch {
-            let desc = error.localizedDescription
-            if desc.contains("Jinja") || desc.contains("TemplateException") || desc.contains("chat_template") || desc.contains("tokenizer") {
-                markIncompatible(id)
-                loadState = .error("This model doesn't support chat. Try a different variant.")
-            } else {
-                loadState = .error(desc)
-            }
+            handleLoadError(error, modelId: id)
             throw error
         }
     }
 
+    private func downloadModel(id: String) async throws {
+        // Cancel any in-progress download (but NOT the active model)
+        downloadTask?.cancel()
+        downloadTask = nil
+        downloadingModelId = id
+        downloadingProgress = 0
+
+        let configuration = ModelConfiguration(id: id)
+
+        downloadTask = Task {
+            let container = try await LLMModelFactory.shared.loadContainer(
+                hub: HubApi.default,
+                configuration: configuration
+            ) { progress in
+                Task { @MainActor in
+                    self.downloadingProgress = progress.fractionCompleted
+                }
+            }
+
+            try Task.checkCancellation()
+
+            let testMessages: [Chat.Message] = [.user("test")]
+            _ = try await container.prepare(input: UserInput(chat: testMessages))
+
+            // Stage for user to activate
+            downloadingModelId = nil
+            downloadingProgress = 0
+            pendingContainer = container
+            pendingModelId = id
+        }
+
+        do {
+            try await downloadTask?.value
+        } catch is CancellationError {
+            downloadingModelId = nil
+            downloadingProgress = 0
+        } catch {
+            downloadingModelId = nil
+            downloadingProgress = 0
+            handleLoadError(error, modelId: id)
+            throw error
+        }
+    }
+
+    private func handleLoadError(_ error: Error, modelId: String) {
+        let desc = error.localizedDescription
+        if desc.contains("Jinja") || desc.contains("TemplateException") || desc.contains("chat_template") || desc.contains("tokenizer") {
+            markIncompatible(modelId)
+            loadState = .error("This model doesn't support chat. Try a different variant.")
+        } else {
+            loadState = .error(desc)
+        }
+    }
+
+    func activatePendingModel() {
+        guard let container = pendingContainer, let id = pendingModelId else { return }
+        Memory.cacheLimit = 0
+        Memory.cacheLimit = 20 * 1024 * 1024
+        loadState = .ready(container)
+        activeModelId = id
+        UserDefaults.standard.set(id, forKey: Self.lastModelKey)
+        pendingContainer = nil
+        pendingModelId = nil
+    }
+
+    func dismissPendingModel() {
+        pendingContainer = nil
+        pendingModelId = nil
+    }
+
     func cancelLoading() {
-        loadTask?.cancel()
-        loadTask = nil
-        loadState = .idle
-        activeModelId = nil
+        downloadTask?.cancel()
+        downloadTask = nil
+        downloadingModelId = nil
+        downloadingProgress = 0
     }
 
     // MARK: - Generation

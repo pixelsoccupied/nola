@@ -227,18 +227,33 @@ struct ChatView: View {
                 .padding(.top, 8)
             }
 
-            if case .downloading(let progress) = mlxService.loadState {
+            if let pendingId = mlxService.pendingModelId, !mlxService.isReady {
                 VStack(spacing: 8) {
-                    if let id = mlxService.activeModelId {
-                        Text(id.components(separatedBy: "/").last ?? id)
-                            .font(.caption.weight(.medium))
-                            .foregroundStyle(.secondary)
+                    Image(systemName: "checkmark.circle.fill")
+                        .font(.title2)
+                        .foregroundStyle(.green)
+                    Text("\(pendingId.components(separatedBy: "/").last ?? pendingId) is ready")
+                        .font(.caption.weight(.medium))
+                        .foregroundStyle(.secondary)
+                    Button("Switch to this model") {
+                        mlxService.activatePendingModel()
                     }
-                    ProgressView(value: progress)
+                    .buttonStyle(.borderedProminent)
+                    .controlSize(.small)
+                }
+                .padding(.top, 8)
+            }
+
+            if let downloadId = mlxService.downloadingModelId, !mlxService.isReady {
+                VStack(spacing: 8) {
+                    Text(downloadId.components(separatedBy: "/").last ?? downloadId)
+                        .font(.caption.weight(.medium))
+                        .foregroundStyle(.secondary)
+                    ProgressView(value: mlxService.downloadingProgress)
                         .progressViewStyle(.linear)
                         .frame(maxWidth: 300)
                     HStack(spacing: 12) {
-                        Text("Downloading… \(Int(progress * 100))%")
+                        Text("Downloading… \(Int(mlxService.downloadingProgress * 100))%")
                             .font(.caption)
                             .foregroundStyle(.tertiary)
                         Button("Cancel") {

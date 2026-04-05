@@ -160,17 +160,50 @@ struct ModelPickerView: View {
                 .padding(.bottom, 6)
             }
 
-            // Active download banner
-            if case .downloading(let progress) = mlxService.loadState,
-               let modelId = mlxService.activeModelId {
+            // Download complete — ready to switch
+            if let pendingId = mlxService.pendingModelId {
+                HStack(spacing: 10) {
+                    Image(systemName: "checkmark.circle.fill")
+                        .foregroundStyle(.green)
+                    VStack(alignment: .leading, spacing: 2) {
+                        Text(pendingId.components(separatedBy: "/").last ?? pendingId)
+                            .font(.subheadline.weight(.medium))
+                        Text("Ready to use")
+                            .font(.caption)
+                            .foregroundStyle(.secondary)
+                    }
+                    Spacer()
+                    Button("Switch") {
+                        mlxService.activatePendingModel()
+                        onDismiss()
+                    }
+                    .buttonStyle(.borderedProminent)
+                    .controlSize(.small)
+                    Button {
+                        mlxService.dismissPendingModel()
+                    } label: {
+                        Image(systemName: "xmark")
+                            .font(.caption.weight(.semibold))
+                            .foregroundStyle(.secondary)
+                    }
+                    .buttonStyle(.plain)
+                }
+                .padding(12)
+                .background(.green.opacity(0.08), in: RoundedRectangle(cornerRadius: 10))
+                .padding(.horizontal, 16)
+                .padding(.vertical, 6)
+            }
+
+            // Active download banner (Available tab only)
+            if selectedTab == .available, let modelId = mlxService.downloadingModelId {
                 VStack(spacing: 6) {
                     HStack(spacing: 10) {
                         Image(systemName: "arrow.down.circle.fill")
-                            .foregroundStyle(.accentColor)
+                            .foregroundStyle(Color.accentColor)
                         VStack(alignment: .leading, spacing: 2) {
                             Text(modelId.components(separatedBy: "/").last ?? modelId)
                                 .font(.subheadline.weight(.medium))
-                            Text("Downloading… \(Int(progress * 100))%")
+                            Text("Downloading… \(Int(mlxService.downloadingProgress * 100))%")
                                 .font(.caption)
                                 .foregroundStyle(.secondary)
                         }
@@ -182,11 +215,11 @@ struct ModelPickerView: View {
                         .foregroundStyle(.red)
                         .buttonStyle(.plain)
                     }
-                    ProgressView(value: progress)
-                        .tint(.accentColor)
+                    ProgressView(value: mlxService.downloadingProgress)
+                        .tint(Color.accentColor)
                 }
                 .padding(12)
-                .background(.accentColor.opacity(0.08), in: RoundedRectangle(cornerRadius: 10))
+                .background(Color.accentColor.opacity(0.08), in: RoundedRectangle(cornerRadius: 10))
                 .padding(.horizontal, 16)
                 .padding(.vertical, 6)
             } else if case .loading = mlxService.loadState,
@@ -287,11 +320,11 @@ struct ModelPickerView: View {
     // MARK: - Model line group header (e.g. "Gemma", "Qwen")
 
     private func lineGroupHeader(_ title: String) -> some View {
-        Text(title.uppercased())
-            .font(.caption2.weight(.semibold))
-            .foregroundStyle(.tertiary)
-            .padding(.top, 12)
-            .padding(.bottom, 4)
+        Text(title)
+            .font(.subheadline.weight(.semibold))
+            .foregroundStyle(.secondary)
+            .padding(.top, 16)
+            .padding(.bottom, 6)
     }
 
     // MARK: - Downloaded model row
@@ -344,6 +377,7 @@ struct ModelPickerView: View {
                     }
                     .buttonStyle(.bordered)
                     .controlSize(.small)
+                    .disabled(mlxService.isLoading)
                 }
             }
 
@@ -447,7 +481,8 @@ struct ModelPickerView: View {
     @ViewBuilder
     private func variantRow(_ model: HFModelInfo, isRecommended: Bool) -> some View {
         let active = mlxService.activeModelId == model.id && mlxService.isReady
-        let loading = mlxService.isLoading && mlxService.activeModelId == model.id
+        let loading = (mlxService.isLoading && mlxService.activeModelId == model.id)
+            || mlxService.downloadingModelId == model.id
         let fits = model.fitsInMemory(memoryGB)
 
         HStack(spacing: 10) {
@@ -502,6 +537,7 @@ struct ModelPickerView: View {
                 .buttonStyle(.bordered)
                 .controlSize(.small)
                 .tint(.accentColor)
+                .disabled(mlxService.isLoading)
             }
         }
         .padding(.vertical, 6)
@@ -511,15 +547,14 @@ struct ModelPickerView: View {
 
     @ViewBuilder
     private var loadingIndicator: some View {
-        switch mlxService.loadState {
-        case .downloading(let progress):
+        if mlxService.isDownloading {
             VStack(alignment: .trailing, spacing: 2) {
-                ProgressView(value: progress).frame(width: 60)
-                Text("\(Int(progress * 100))%")
+                ProgressView(value: mlxService.downloadingProgress).frame(width: 60)
+                Text("\(Int(mlxService.downloadingProgress * 100))%")
                     .font(.caption2)
                     .foregroundStyle(.secondary)
             }
-        default:
+        } else {
             ProgressView().controlSize(.small)
         }
     }
