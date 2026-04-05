@@ -20,6 +20,10 @@ final class Message {
     var tokenCount: Int?
     var memoryBytesUsed: Int?
 
+    // Thinking (models with native <think> support)
+    var thinkingContent: String?
+    var thinkingSeconds: Double?
+
     var tokensPerSecond: Double? {
         guard let tokens = tokenCount, let seconds = generationSeconds, seconds > 0 else { return nil }
         return Double(tokens) / seconds

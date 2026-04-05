@@ -128,7 +128,13 @@ struct DownloadModelsButton: View {
 
 struct ThinkingToggleButton: View {
     @Environment(MLXService.self) private var mlxService
+    @Environment(ModelManager.self) private var modelManager
     var chatViewModel: ChatViewModel
+
+    private var modelSupportsThinking: Bool {
+        guard let id = mlxService.activeModelId else { return false }
+        return modelManager.mlxModels.first { $0.id == id }?.supportsThinking ?? false
+    }
 
     var body: some View {
         Button {
@@ -137,9 +143,24 @@ struct ThinkingToggleButton: View {
             Label("Thinking", systemImage: "lightbulb")
                 .labelStyle(.iconOnly)
                 .symbolVariant(chatViewModel.thinkingEnabled ? .fill : .none)
-                .foregroundStyle(chatViewModel.thinkingEnabled ? Color.accentColor : .secondary)
+                .foregroundStyle(buttonColor)
         }
-        .help(chatViewModel.thinkingEnabled ? "Thinking: On" : "Thinking: Off")
-        .disabled(!mlxService.isReady)
+        .help(helpText)
+        .disabled(!mlxService.isReady || !modelSupportsThinking)
+        .onChange(of: mlxService.activeModelId) {
+            if !modelSupportsThinking {
+                chatViewModel.thinkingEnabled = false
+            }
+        }
+    }
+
+    private var buttonColor: Color {
+        if !modelSupportsThinking { return .secondary.opacity(0.4) }
+        return chatViewModel.thinkingEnabled ? .accentColor : .secondary
+    }
+
+    private var helpText: String {
+        if !modelSupportsThinking { return "Thinking not supported by this model" }
+        return chatViewModel.thinkingEnabled ? "Thinking: On" : "Thinking: Off"
     }
 }

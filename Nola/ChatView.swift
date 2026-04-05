@@ -210,11 +210,16 @@ struct ChatView: View {
         try? modelContext.save()
         draft = ""
 
+        let supportsThinking = mlxService.activeModelId
+            .flatMap { id in modelManager.mlxModels.first { $0.id == id } }?
+            .supportsThinking ?? false
+
         chatViewModel.send(
             message: trimmed,
             conversation: conversation,
             mlxService: mlxService,
-            modelContext: modelContext
+            modelContext: modelContext,
+            modelSupportsThinking: supportsThinking
         )
     }
 }
@@ -229,7 +234,10 @@ private struct StreamingMessageBubble: View {
         MessageBubble(
             message: message,
             isStreaming: true,
-            contentOverride: chatViewModel.streamingContent.isEmpty ? nil : chatViewModel.streamingContent
+            contentOverride: chatViewModel.streamingContent.isEmpty ? nil : chatViewModel.streamingContent,
+            isThinkingLive: chatViewModel.isThinking,
+            thinkingContentOverride: chatViewModel.streamingThinkingContent.isEmpty ? nil : chatViewModel.streamingThinkingContent,
+            thinkingSecondsOverride: chatViewModel.thinkingElapsed > 0 ? chatViewModel.thinkingElapsed : nil
         )
     }
 }

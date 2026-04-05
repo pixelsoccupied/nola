@@ -4,54 +4,115 @@ struct MessageBubble: View {
     let message: Message
     let isStreaming: Bool
     var contentOverride: String?
+    var isThinkingLive = false
+    var thinkingContentOverride: String?
+    var thinkingSecondsOverride: Double?
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
     @State private var isHovering = false
+    @State private var showThinking = false
+
+    private var thinkingText: String? {
+        thinkingContentOverride ?? message.thinkingContent
+    }
+
+    private var thinkingSecs: Double? {
+        thinkingSecondsOverride ?? message.thinkingSeconds
+    }
 
     var body: some View {
         HStack(alignment: .top, spacing: 0) {
             if message.role == .user { Spacer(minLength: 60) }
 
-            Text(renderedContent)
-                .textSelection(.enabled)
-                .padding(12)
-                .foregroundStyle(message.role == .user ? .white : .primary)
-                .glassEffect(
-                    message.role == .user
-                        ? .regular.tint(.accentColor)
-                        : .regular,
-                    in: .rect(cornerRadius: 16)
-                )
-                .frame(maxWidth: 640, alignment: message.role == .user ? .trailing : .leading)
-                .overlay(alignment: message.role == .user ? .bottomTrailing : .bottomLeading) {
-                    HStack(spacing: 6) {
-                        Text(message.timestamp, style: .time)
-                        if message.role == .assistant, !isStreaming {
-                            if let seconds = message.generationSeconds {
-                                Text("·")
-                                Text(formatDuration(seconds))
-                            }
-                            if let tps = message.tokensPerSecond {
-                                Text("·")
-                                Text(String(format: "%.0f tok/s", tps))
-                            }
-                            if let mem = message.memoryBytesUsed {
-                                Text("·")
-                                Text(String(format: "%.1f GB", Double(mem) / 1_073_741_824))
-                            }
+            VStack(alignment: .leading, spacing: 4) {
+                // Thinking — clickable header that expands inline
+                if isThinkingLive || thinkingText != nil {
+                    thinkingSection
+                }
+
+                // Message content bubble
+                Text(renderedContent)
+                    .textSelection(.enabled)
+                    .padding(12)
+                    .foregroundStyle(message.role == .user ? .white : .primary)
+                    .glassEffect(
+                        message.role == .user
+                            ? .regular.tint(.accentColor)
+                            : .regular,
+                        in: .rect(cornerRadius: 16)
+                    )
+            }
+            .frame(maxWidth: 640, alignment: message.role == .user ? .trailing : .leading)
+            .overlay(alignment: message.role == .user ? .bottomTrailing : .bottomLeading) {
+                HStack(spacing: 6) {
+                    Text(message.timestamp, style: .time)
+                    if message.role == .assistant, !isStreaming {
+                        if let seconds = message.generationSeconds {
+                            Text("·")
+                            Text(formatDuration(seconds))
+                        }
+                        if let tps = message.tokensPerSecond {
+                            Text("·")
+                            Text(String(format: "%.0f tok/s", tps))
+                        }
+                        if let mem = message.memoryBytesUsed {
+                            Text("·")
+                            Text(String(format: "%.1f GB", Double(mem) / 1_073_741_824))
                         }
                     }
-                    .font(.caption2)
-                    .foregroundStyle(.tertiary)
-                    .offset(y: 18)
-                    .opacity(isHovering ? 1 : 0)
-                    .animation(reduceMotion ? nil : .easeInOut(duration: 0.15), value: isHovering)
                 }
+                .font(.caption2)
+                .foregroundStyle(.tertiary)
+                .offset(y: 18)
+                .opacity(isHovering ? 1 : 0)
+                .animation(reduceMotion ? nil : .easeInOut(duration: 0.15), value: isHovering)
+            }
 
             if message.role == .assistant { Spacer(minLength: 60) }
         }
         .padding(.vertical, 6)
         .onHover { isHovering = $0 }
     }
+
+    // MARK: - Thinking section
+
+    @ViewBuilder
+    private var thinkingSection: some View {
+        VStack(alignment: .leading, spacing: 4) {
+            Button {
+                withAnimation(.easeInOut(duration: 0.2)) {
+                    showThinking.toggle()
+                }
+            } label: {
+                HStack(spacing: 6) {
+                    Image(systemName: "lightbulb.fill")
+                        .symbolEffect(.pulse, options: .repeating, isActive: isThinkingLive)
+                    if isThinkingLive, thinkingSecs == nil {
+                        Text("Thinking…")
+                    } else if let secs = thinkingSecs {
+                        Text("Thought for \(formatDuration(secs))")
+                    }
+                    Image(systemName: "chevron.right")
+                        .font(.caption2)
+                        .rotationEffect(.degrees(showThinking || isThinkingLive ? 90 : 0))
+                }
+                .font(.caption)
+                .foregroundStyle(.secondary)
+            }
+            .buttonStyle(.plain)
+            .padding(.leading, 14)
+
+            if showThinking || isThinkingLive, let text = thinkingText, !text.isEmpty {
+                Text(renderMarkdown(text))
+                    .textSelection(.enabled)
+                    .font(.callout)
+                    .foregroundStyle(.secondary)
+                    .padding(.horizontal, 14)
+                    .padding(.vertical, 4)
+            }
+        }
+    }
+
+    // MARK: - Helpers
 
     private var displayContent: String {
         let content = contentOverride ?? message.content
@@ -70,8 +131,10 @@ struct MessageBubble: View {
     }
 
     private var renderedContent: AttributedString {
-        let raw = displayContent
-        // Try markdown parsing; falls back to plain text on failure
+        renderMarkdown(displayContent)
+    }
+
+    private func renderMarkdown(_ raw: String) -> AttributedString {
         guard let attributed = try? AttributedString(
             markdown: raw,
             options: .init(interpretedSyntax: .inlineOnlyPreservingWhitespace)
