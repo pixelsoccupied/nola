@@ -39,5 +39,4 @@ struct NolaApp: App {
 
 extension Notification.Name {
     static let newChat = Notification.Name("newChat")
-    static let showModelPicker = Notification.Name("showModelPicker")
 }

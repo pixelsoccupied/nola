@@ -1,4 +1,5 @@
 import Foundation
+import MLX
 import MLXLMCommon
 import SwiftData
 import SwiftUI
@@ -9,6 +10,7 @@ final class ChatViewModel {
     var streamingContent = ""
     var isGenerating = false
     var generationError: GenerationError?
+    var thinkingEnabled = false
 
     private var generationTask: Task<Void, Never>?
 
@@ -58,6 +60,8 @@ final class ChatViewModel {
         let chatMessages = buildChatMessages(from: conversation)
 
         generationTask = Task {
+            let startTime = ContinuousClock.now
+            var tokenCount = 0
             do {
                 let stream = mlxService.generate(
                     messages: chatMessages,
@@ -65,8 +69,14 @@ final class ChatViewModel {
                 )
                 for try await chunk in stream {
                     streamingContent += chunk
+                    tokenCount += 1
                 }
                 assistantMessage.content = streamingContent
+                let elapsed = ContinuousClock.now - startTime
+                let (seconds, attoseconds) = elapsed.components
+                assistantMessage.generationSeconds = Double(seconds) + Double(attoseconds) / 1e18
+                assistantMessage.tokenCount = tokenCount
+                assistantMessage.memoryBytesUsed = Memory.activeMemory + Memory.cacheMemory
             } catch {
                 if Task.isCancelled {
                     assistantMessage.content = streamingContent + " [Cancelled]"
@@ -97,8 +107,11 @@ final class ChatViewModel {
     }
 
     private func buildChatMessages(from conversation: Conversation) -> [Chat.Message] {
+        let systemPrompt = thinkingEnabled
+            ? "You are a helpful assistant. Think through problems step by step before giving your final answer. Show your reasoning."
+            : "You are a helpful assistant."
         var messages: [Chat.Message] = [
-            .system("You are a helpful assistant.")
+            .system(systemPrompt)
         ]
         for msg in conversation.sortedMessages {
             if msg.role == .assistant && msg.content.isEmpty { continue }

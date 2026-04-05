@@ -15,6 +15,16 @@ final class Message {
     var timestamp: Date
     var conversation: Conversation?
 
+    // Generation stats (assistant messages only)
+    var generationSeconds: Double?
+    var tokenCount: Int?
+    var memoryBytesUsed: Int?
+
+    var tokensPerSecond: Double? {
+        guard let tokens = tokenCount, let seconds = generationSeconds, seconds > 0 else { return nil }
+        return Double(tokens) / seconds
+    }
+
     init(role: MessageRole, content: String) {
         self.id = UUID()
         self.role = role

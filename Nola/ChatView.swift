@@ -5,6 +5,7 @@ struct ChatView: View {
     @Environment(MLXService.self) private var mlxService
     @Environment(ModelManager.self) private var modelManager
     @Environment(\.modelContext) private var modelContext
+    @Environment(\.colorScheme) private var colorScheme
 
     let conversation: Conversation
     var chatViewModel: ChatViewModel
@@ -68,22 +69,33 @@ struct ChatView: View {
             }
         }
         .background {
-            LinearGradient(
-                colors: [
-                    Color(.windowBackgroundColor),
-                    Color(red: 0.08, green: 0.12, blue: 0.18).opacity(0.8),
-                    Color(red: 0.14, green: 0.08, blue: 0.06).opacity(0.5)
-                ],
-                startPoint: .top,
-                endPoint: .bottom
-            )
-            .ignoresSafeArea()
+            chatBackground
+                .ignoresSafeArea()
         }
         .onAppear { isInputFocused = true }
         .onChange(of: conversation.id) { isInputFocused = true }
         .onChange(of: chatViewModel.isGenerating) {
             if !chatViewModel.isGenerating { isInputFocused = true }
         }
+    }
+
+    // MARK: - Background
+
+    private var chatBackground: some View {
+        LinearGradient(
+            colors: colorScheme == .dark
+                ? [
+                    Color(.windowBackgroundColor),
+                    Color(red: 0.08, green: 0.12, blue: 0.18).opacity(0.8),
+                    Color(red: 0.14, green: 0.08, blue: 0.06).opacity(0.5)
+                ]
+                : [
+                    Color(.windowBackgroundColor),
+                    Color(.windowBackgroundColor)
+                ],
+            startPoint: .top,
+            endPoint: .bottom
+        )
     }
 
     // MARK: - Error banner
@@ -99,14 +111,6 @@ struct ChatView: View {
                         .font(.subheadline)
                 }
                 Spacer()
-                if error.isModelIncompatible {
-                    Button("Try Another") {
-                        chatViewModel.dismissError()
-                        NotificationCenter.default.post(name: .showModelPicker, object: nil)
-                    }
-                    .buttonStyle(.bordered)
-                    .controlSize(.small)
-                }
                 Button {
                     chatViewModel.dismissError()
                 } label: {
@@ -124,37 +128,35 @@ struct ChatView: View {
         }
     }
 
-    // MARK: - Input bar (glass navigation layer)
+    // MARK: - Input bar (glass capsule)
 
     private var inputBar: some View {
-        VStack(spacing: 0) {
-            HStack(spacing: 12) {
-                TextField("Message…", text: $draft)
-                    .textFieldStyle(.plain)
-                    .focused($isInputFocused)
-                    .onSubmit { send(); isInputFocused = true }
+        HStack(spacing: 12) {
+            TextField("Message…", text: $draft)
+                .textFieldStyle(.plain)
+                .focused($isInputFocused)
+                .onSubmit { send(); isInputFocused = true }
 
-                if chatViewModel.isGenerating {
-                    Button(action: chatViewModel.stopGenerating) {
-                        Image(systemName: "stop.circle.fill")
-                            .font(.system(size: 24))
-                            .foregroundStyle(.red)
-                    }
-                    .buttonStyle(.plain)
-                } else {
-                    Button(action: send) {
-                        Image(systemName: "arrow.up.circle.fill")
-                            .font(.system(size: 24))
-                            .foregroundStyle(canSend ? Color.accentColor : Color(.separatorColor))
-                    }
-                    .buttonStyle(.plain)
-                    .disabled(!canSend)
+            if chatViewModel.isGenerating {
+                Button(action: chatViewModel.stopGenerating) {
+                    Image(systemName: "stop.circle.fill")
+                        .font(.system(size: 24))
+                        .foregroundStyle(.red)
                 }
+                .buttonStyle(.plain)
+            } else {
+                Button(action: send) {
+                    Image(systemName: "arrow.up.circle.fill")
+                        .font(.system(size: 24))
+                        .foregroundStyle(canSend ? Color.accentColor : Color(.separatorColor))
+                }
+                .buttonStyle(.plain)
+                .disabled(!canSend)
             }
-            .padding(.horizontal, 16)
-            .padding(.vertical, 10)
-            .glassEffect(.regular, in: .capsule)
         }
+        .padding(.horizontal, 16)
+        .padding(.vertical, 10)
+        .glassEffect(.regular, in: .capsule)
         .frame(maxWidth: 720)
         .padding(.horizontal, 12)
         .padding(.bottom, 8)
@@ -177,94 +179,6 @@ struct ChatView: View {
                 Text(id.components(separatedBy: "/").last ?? id)
                     .font(.caption)
                     .foregroundStyle(.tertiary)
-            } else if !mlxService.isLoading {
-                let quickLoadId = mlxService.lastUsedModelId
-                    ?? modelManager.mlxModels.first?.id
-
-                if let modelId = quickLoadId {
-                    Button {
-                        Task { try? await mlxService.loadModel(id: modelId) }
-                    } label: {
-                        HStack(spacing: 6) {
-                            Image(systemName: "arrow.counterclockwise")
-                            Text("Load \(modelId.components(separatedBy: "/").last ?? modelId)")
-                        }
-                        .font(.subheadline)
-                        .foregroundStyle(Color.accentColor)
-                    }
-                    .buttonStyle(.plain)
-                    .padding(.top, 4)
-                }
-
-                Button {
-                    NotificationCenter.default.post(name: .showModelPicker, object: nil)
-                } label: {
-                    HStack(spacing: 6) {
-                        Image(systemName: "brain")
-                        Text(quickLoadId != nil ? "Browse models" : "Choose a model to get started")
-                    }
-                    .font(.caption)
-                    .foregroundStyle(.secondary)
-                }
-                .buttonStyle(.plain)
-                .padding(.top, quickLoadId != nil ? 2 : 4)
-            }
-
-            if case .loading = mlxService.loadState {
-                VStack(spacing: 6) {
-                    if let id = mlxService.activeModelId {
-                        Text(id.components(separatedBy: "/").last ?? id)
-                            .font(.caption.weight(.medium))
-                            .foregroundStyle(.secondary)
-                    }
-                    HStack(spacing: 6) {
-                        ProgressView().controlSize(.small)
-                        Text("Loading model…")
-                            .font(.caption)
-                            .foregroundStyle(.tertiary)
-                    }
-                }
-                .padding(.top, 8)
-            }
-
-            if let pendingId = mlxService.pendingModelId, !mlxService.isReady {
-                VStack(spacing: 8) {
-                    Image(systemName: "checkmark.circle.fill")
-                        .font(.title2)
-                        .foregroundStyle(.green)
-                    Text("\(pendingId.components(separatedBy: "/").last ?? pendingId) is ready")
-                        .font(.caption.weight(.medium))
-                        .foregroundStyle(.secondary)
-                    Button("Switch to this model") {
-                        mlxService.activatePendingModel()
-                    }
-                    .buttonStyle(.borderedProminent)
-                    .controlSize(.small)
-                }
-                .padding(.top, 8)
-            }
-
-            if let downloadId = mlxService.downloadingModelId, !mlxService.isReady {
-                VStack(spacing: 8) {
-                    Text(downloadId.components(separatedBy: "/").last ?? downloadId)
-                        .font(.caption.weight(.medium))
-                        .foregroundStyle(.secondary)
-                    ProgressView(value: mlxService.downloadingProgress)
-                        .progressViewStyle(.linear)
-                        .frame(maxWidth: 300)
-                    HStack(spacing: 12) {
-                        Text("Downloading… \(Int(mlxService.downloadingProgress * 100))%")
-                            .font(.caption)
-                            .foregroundStyle(.tertiary)
-                        Button("Cancel") {
-                            mlxService.cancelLoading()
-                        }
-                        .font(.caption)
-                        .foregroundStyle(.red)
-                        .buttonStyle(.plain)
-                    }
-                }
-                .padding(.top, 8)
             }
 
             if case .error(let msg) = mlxService.loadState {

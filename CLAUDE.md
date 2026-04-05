@@ -19,11 +19,12 @@ A macOS-native chat app for running LLMs locally using Apple's MLX framework.
 
 - `NolaApp.swift` — App entry point with AppDelegate for activation policy fix
 - `ContentView.swift` — NavigationSplitView (sidebar + detail), date-grouped conversations
-- `ChatView.swift` — Chat messages, input bar, empty state, error banner
+- `ChatView.swift` — Chat messages, input bar, model switcher chip, empty state, error banner
 - `ChatViewModel.swift` — Message sending, streaming, generation, error handling
 - `MLXService.swift` — Model loading, caching, generation streams
 - `ModelManager.swift` — Scans ~/.cache/huggingface for downloaded models
-- `ModelPickerView.swift` — Brain button + unified model picker popover
+- `BrainStatusButton.swift` — Brain toolbar icon (status indicator + opens browser sheet)
+- `ModelBrowserSheet.swift` — Full model browser sheet (search, download, HuggingFace)
 - `MessageBubble.swift` — Individual message rendering with glass effects
 - `HuggingFaceService.swift` — HF API client for fetching model listings
 - `HFModelInfo.swift` — Model metadata, size detection, device capability
@@ -59,10 +60,18 @@ than small controls (toolbars, tab bars). Don't fight this.
 - In full screen mode, macOS renders the toolbar with a solid background — this is system
   behavior and `.toolbarBackgroundVisibility(.hidden)` does not override it in full screen
 
-### Model Picker Notification
-The model picker popover is owned by `BrainModelButton` in the toolbar. Other
-views (like the empty state) open it via `NotificationCenter.default.post(name: .showModelPicker)`.
-Defined in `NolaApp.swift` alongside `.newChat`.
+### Brain Status Button (Toolbar)
+`BrainStatusButton` in the toolbar shows model status with color (green=ready,
+gold/pulsing=loading/downloading, gray=idle). Clicking it opens the `ModelBrowserSheet`
+for browsing and downloading new models. It does NOT handle model switching.
+
+### Model Controls Row (Input Bar)
+Model switching and settings live in a subtle row below the glass input capsule in ChatView.
+- Left side: model chip — a `Menu` (pop-up button) listing downloaded models with checkmark on active
+- "Get More Models…" at the bottom of the menu also opens `ModelBrowserSheet`
+- When no model is loaded, the chip offers one-click "Load {last used model}"
+- Right side: thinking toggle — enables step-by-step reasoning system prompt
+- Background download progress shows as a small indicator in the row
 
 ### Input Bar & Scrolling
 - Input bar uses `.safeAreaInset(edge: .bottom)` — NOT a ZStack overlay
@@ -88,7 +97,7 @@ Defined in `NolaApp.swift` alongside `.newChat`.
 ### Branding & Color
 - Accent color: burnished gold (#C0873A light / #D4A04E dark), NOT plain orange
 - Increased contrast variants defined in AccentColor asset
-- Brand color used for: user message bubble tints, send button, brain icon (loading), accent links
+- Brand color used for: user message bubble tints, send button, model chip (loading), accent links
 - Warning/error colors use system `.orange` — semantically distinct from brand
 - `.orange` in the codebase = warnings only (e.g., "Too large", error labels)
 - `.accentColor` = brand identity (brain loading state, interactive elements)
@@ -122,7 +131,7 @@ Streaming tokens arrive at 30-80/sec. ChatView.body must NOT re-evaluate per-tok
   — Jinja/template errors → "This model doesn't support chat"
   — Tokenizer errors → "This model's tokenizer isn't compatible"
 - Empty assistant messages are removed on error (no blank bubble left behind)
-- Error banner offers "Try Another" button that opens the model picker
+- Error banner offers "Try Another" button that opens the model browser sheet
 - Errors auto-clear on conversation switch
 
 ### Liquid Glass (macOS 26)
@@ -131,7 +140,9 @@ Streaming tokens arrive at 30-80/sec. ChatView.body must NOT re-evaluate per-tok
 - Do NOT use `.interactive()` on message bubbles — they are not tappable controls
 - No glass-on-glass stacking — don't add `.buttonStyle(.glass)` to toolbar items
 - `.buttonStyle(.glassProminent)` only for text CTA buttons, NOT icon-only buttons
-- Brain icon uses `.symbolEffect(.pulse)` for loading — no manual TimelineView animation
+- Brain icon uses `.symbolEffect(.pulse)` for loading/downloading — no manual TimelineView animation
+- Model controls row below the input capsule has NO glass — plain text/buttons only
+- Input bar stays `.glassEffect(.regular, in: .capsule)` — clean, single glass element
 
 ### Motion & Accessibility
 - All custom animations respect `accessibilityReduceMotion`

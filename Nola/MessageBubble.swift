@@ -23,17 +23,33 @@ struct MessageBubble: View {
                 )
                 .frame(maxWidth: 640, alignment: message.role == .user ? .trailing : .leading)
                 .overlay(alignment: message.role == .user ? .bottomTrailing : .bottomLeading) {
-                    Text(message.timestamp, style: .time)
-                        .font(.caption2)
-                        .foregroundStyle(.tertiary)
-                        .offset(y: 18)
-                        .opacity(isHovering ? 1 : 0)
-                        .animation(reduceMotion ? nil : .easeInOut(duration: 0.15), value: isHovering)
+                    HStack(spacing: 6) {
+                        Text(message.timestamp, style: .time)
+                        if message.role == .assistant, !isStreaming {
+                            if let seconds = message.generationSeconds {
+                                Text("·")
+                                Text(formatDuration(seconds))
+                            }
+                            if let tps = message.tokensPerSecond {
+                                Text("·")
+                                Text(String(format: "%.0f tok/s", tps))
+                            }
+                            if let mem = message.memoryBytesUsed {
+                                Text("·")
+                                Text(String(format: "%.1f GB", Double(mem) / 1_073_741_824))
+                            }
+                        }
+                    }
+                    .font(.caption2)
+                    .foregroundStyle(.tertiary)
+                    .offset(y: 18)
+                    .opacity(isHovering ? 1 : 0)
+                    .animation(reduceMotion ? nil : .easeInOut(duration: 0.15), value: isHovering)
                 }
 
             if message.role == .assistant { Spacer(minLength: 60) }
         }
-        .padding(.vertical, 4)
+        .padding(.vertical, 6)
         .onHover { isHovering = $0 }
     }
 
@@ -43,6 +59,14 @@ struct MessageBubble: View {
             return "..."
         }
         return content
+    }
+
+    private func formatDuration(_ seconds: Double) -> String {
+        if seconds < 1 { return String(format: "%.0fms", seconds * 1000) }
+        if seconds < 60 { return String(format: "%.1fs", seconds) }
+        let mins = Int(seconds) / 60
+        let secs = Int(seconds) % 60
+        return "\(mins)m \(secs)s"
     }
 
     private var renderedContent: AttributedString {

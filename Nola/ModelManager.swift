@@ -65,16 +65,19 @@ final class ModelManager {
         guard let entries = try? fm.contentsOfDirectory(atPath: hubDir.path) else { return [] }
 
         var models: [DownloadedModel] = []
+        var seenIds: Set<String> = []
         for entry in entries where entry.hasPrefix("models--") {
             let parts = entry.replacingOccurrences(of: "models--", with: "")
                 .components(separatedBy: "--")
             guard parts.count >= 2 else { continue }
 
             let modelId = parts.joined(separator: "/")
-            let modelPath = hubDir.appendingPathComponent(entry)
+            guard !seenIds.contains(modelId) else { continue }
 
+            let modelPath = hubDir.appendingPathComponent(entry)
             guard hasModelWeights(at: modelPath) else { continue }
 
+            seenIds.insert(modelId)
             let size = directorySize(at: modelPath)
             models.append(DownloadedModel(id: modelId, path: modelPath, sizeBytes: size))
         }
@@ -86,10 +89,13 @@ final class ModelManager {
         guard let enumerator = fm.enumerator(at: url, includingPropertiesForKeys: nil) else {
             return false
         }
+        var hasWeights = false
+        var hasConfig = false
         for case let fileURL as URL in enumerator {
-            if fileURL.lastPathComponent.hasSuffix(".safetensors") {
-                return true
-            }
+            let name = fileURL.lastPathComponent
+            if name.hasSuffix(".safetensors") { hasWeights = true }
+            if name == "config.json" { hasConfig = true }
+            if hasWeights && hasConfig { return true }
         }
         return false
     }

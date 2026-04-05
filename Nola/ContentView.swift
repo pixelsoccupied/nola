@@ -40,6 +40,9 @@ struct ContentView: View {
             .listStyle(.sidebar)
             .navigationTitle("Chats")
             .safeAreaPadding(.top, 12)
+            .safeAreaInset(edge: .bottom) {
+                MemoryIndicator()
+            }
             .navigationSplitViewColumnWidth(min: 200, ideal: 240)
         } detail: {
             if let conversation = selectedConversation {
@@ -56,12 +59,20 @@ struct ContentView: View {
         }
         .navigationSplitViewStyle(.prominentDetail)
         .toolbar {
-            ToolbarItem(placement: .automatic) {
+            // Leading — navigation
+            ToolbarItem(placement: .navigation) {
                 Button(action: newChat) {
                     Label("New Chat", systemImage: "plus")
                         .labelStyle(.iconOnly)
                 }
                 .help("New Chat (⌘N)")
+            }
+            // Trailing — LLM controls
+            ToolbarItem(placement: .automatic) {
+                ThinkingToggleButton(chatViewModel: chatViewModel)
+            }
+            ToolbarItem(placement: .automatic) {
+                DownloadModelsButton()
             }
             ToolbarItem(placement: .automatic) {
                 BrainModelButton()
@@ -82,8 +93,13 @@ struct ContentView: View {
                 modelContext.delete(conversation)
             }
             try? modelContext.save()
-            // Always start fresh
             newChat()
+            // Auto-load last used model (or first available)
+            let autoLoadId = mlxService.lastUsedModelId
+                ?? modelManager.mlxModels.first?.id
+            if let modelId = autoLoadId {
+                try? await mlxService.loadModel(id: modelId)
+            }
         }
     }
 
