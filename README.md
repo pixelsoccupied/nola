@@ -4,6 +4,8 @@
 
 Built with SwiftUI and [MLX](https://github.com/ml-explore/mlx-swift) for Apple Silicon. Models run entirely on-device.
 
+![Nola](hero.png)
+
 ## Requirements
 
 - macOS 26 (Tahoe)
