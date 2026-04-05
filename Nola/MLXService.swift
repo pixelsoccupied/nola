@@ -3,11 +3,14 @@ import Hub
 import MLX
 import MLXLLM
 import MLXLMCommon
+import os
 import SwiftUI
 
 @Observable
 @MainActor
 final class MLXService {
+
+    private static let log = Logger(subsystem: "com.nola.app", category: "MLXService")
 
     enum LoadState: Sendable {
         case idle
@@ -22,6 +25,7 @@ final class MLXService {
     // Current model state — stays .ready during background downloads
     var loadState: LoadState = .idle
     var activeModelId: String?
+    var loadingProgress: Double = 0
 
     // Background download tracking — separate from active model
     var downloadingModelId: String?
@@ -86,21 +90,31 @@ final class MLXService {
         Memory.cacheLimit = 20 * 1024 * 1024
         activeModelId = id
         loadState = .loading
+        loadingProgress = 0
 
+        Self.log.info("Loading local model: \(id)")
         let configuration = ModelConfiguration(id: id)
 
         loadTask = Task {
             let container = try await LLMModelFactory.shared.loadContainer(
                 hub: HubApi.default,
                 configuration: configuration
-            ) { _ in }
+            ) { progress in
+                Task { @MainActor in
+                    self.loadingProgress = progress.fractionCompleted
+                }
+                Self.log.debug("Loading \(id): \(Int(progress.fractionCompleted * 100))%")
+            }
 
             try Task.checkCancellation()
+            Self.log.info("Weights loaded for \(id), validating chat template…")
 
             let testMessages: [Chat.Message] = [.user("test")]
             _ = try await container.prepare(input: UserInput(chat: testMessages))
 
+            Self.log.info("Model ready: \(id)")
             loadState = .ready(container)
+            loadingProgress = 0
             activeModelId = id
             UserDefaults.standard.set(id, forKey: Self.lastModelKey)
         }
@@ -108,8 +122,12 @@ final class MLXService {
         do {
             try await loadTask?.value
         } catch is CancellationError {
+            Self.log.info("Loading cancelled: \(id)")
             loadState = .idle
+            loadingProgress = 0
         } catch {
+            Self.log.error("Loading failed for \(id): \(error.localizedDescription)")
+            loadingProgress = 0
             handleLoadError(error, modelId: id)
             throw error
         }
@@ -122,6 +140,7 @@ final class MLXService {
         downloadingModelId = id
         downloadingProgress = 0
 
+        Self.log.info("Downloading model: \(id)")
         let configuration = ModelConfiguration(id: id)
 
         downloadTask = Task {
@@ -132,13 +151,16 @@ final class MLXService {
                 Task { @MainActor in
                     self.downloadingProgress = progress.fractionCompleted
                 }
+                Self.log.debug("Downloading \(id): \(Int(progress.fractionCompleted * 100))%")
             }
 
             try Task.checkCancellation()
+            Self.log.info("Download complete for \(id), validating chat template…")
 
             let testMessages: [Chat.Message] = [.user("test")]
             _ = try await container.prepare(input: UserInput(chat: testMessages))
 
+            Self.log.info("Model validated and staged: \(id)")
             // Stage for user to activate
             downloadingModelId = nil
             downloadingProgress = 0
@@ -149,9 +171,11 @@ final class MLXService {
         do {
             try await downloadTask?.value
         } catch is CancellationError {
+            Self.log.info("Download cancelled: \(id)")
             downloadingModelId = nil
             downloadingProgress = 0
         } catch {
+            Self.log.error("Download failed for \(id): \(error.localizedDescription)")
             downloadingModelId = nil
             downloadingProgress = 0
             handleLoadError(error, modelId: id)

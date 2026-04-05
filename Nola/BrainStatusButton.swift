@@ -41,7 +41,8 @@ struct BrainModelButton: View {
                     } label: {
                         HStack(spacing: 10) {
                             if isLoading {
-                                ProgressView()
+                                ProgressView(value: mlxService.loadingProgress)
+                                    .progressViewStyle(.circular)
                                     .controlSize(.small)
                             } else {
                                 Image(systemName: isActive ? "checkmark.circle.fill" : "circle")
@@ -52,7 +53,7 @@ struct BrainModelButton: View {
                                 Text(model.displayName)
                                     .font(.body)
                                     .fontWeight(isActive || isLoading ? .semibold : .regular)
-                                Text(isLoading ? "Loading…" : model.formattedSize)
+                                Text(isLoading ? "Loading \(Int(mlxService.loadingProgress * 100))%…" : model.formattedSize)
                                     .font(.caption)
                                     .foregroundStyle(isLoading ? Color.accentColor : .secondary)
                             }
@@ -96,7 +97,7 @@ struct BrainModelButton: View {
         if let id = mlxService.activeModelId, mlxService.isReady {
             return id.components(separatedBy: "/").last ?? id
         } else if mlxService.isLoading {
-            return "Loading model…"
+            return "Loading model… \(Int(mlxService.loadingProgress * 100))%"
         } else {
             return "Choose a model"
         }

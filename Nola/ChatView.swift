@@ -164,29 +164,28 @@ struct ChatView: View {
 
     // MARK: - Empty state
 
-    @ViewBuilder
     private var emptyState: some View {
         VStack(spacing: 12) {
             Image(systemName: "bubble.left.and.text.bubble.right")
                 .font(.system(size: 40))
                 .foregroundStyle(.quaternary)
 
-            Text("What can I help you with?")
+            Text(emptyStateMessage)
                 .font(.title3)
                 .foregroundStyle(.secondary)
+        }
+    }
 
-            if mlxService.isReady, let id = mlxService.activeModelId {
-                Text(id.components(separatedBy: "/").last ?? id)
-                    .font(.caption)
-                    .foregroundStyle(.tertiary)
-            }
-
-            if case .error(let msg) = mlxService.loadState {
-                Label(msg, systemImage: "exclamationmark.triangle")
-                    .font(.caption)
-                    .foregroundStyle(.orange)
-                    .padding(.top, 8)
-            }
+    private var emptyStateMessage: String {
+        switch mlxService.loadState {
+        case .loading:
+            return "Loading model… \(Int(mlxService.loadingProgress * 100))%"
+        case .idle:
+            return "Choose a model to get started"
+        case .error(let msg):
+            return msg
+        case .ready:
+            return "What can I help you with?"
         }
     }
 
