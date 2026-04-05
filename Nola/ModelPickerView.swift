@@ -160,6 +160,52 @@ struct ModelPickerView: View {
                 .padding(.bottom, 6)
             }
 
+            // Active download banner
+            if case .downloading(let progress) = mlxService.loadState,
+               let modelId = mlxService.activeModelId {
+                VStack(spacing: 6) {
+                    HStack(spacing: 10) {
+                        Image(systemName: "arrow.down.circle.fill")
+                            .foregroundStyle(.accentColor)
+                        VStack(alignment: .leading, spacing: 2) {
+                            Text(modelId.components(separatedBy: "/").last ?? modelId)
+                                .font(.subheadline.weight(.medium))
+                            Text("Downloading… \(Int(progress * 100))%")
+                                .font(.caption)
+                                .foregroundStyle(.secondary)
+                        }
+                        Spacer()
+                        Button("Cancel") {
+                            mlxService.cancelLoading()
+                        }
+                        .font(.caption)
+                        .foregroundStyle(.red)
+                        .buttonStyle(.plain)
+                    }
+                    ProgressView(value: progress)
+                        .tint(.accentColor)
+                }
+                .padding(12)
+                .background(.accentColor.opacity(0.08), in: RoundedRectangle(cornerRadius: 10))
+                .padding(.horizontal, 16)
+                .padding(.vertical, 6)
+            } else if case .loading = mlxService.loadState,
+                      let modelId = mlxService.activeModelId {
+                HStack(spacing: 10) {
+                    ProgressView().controlSize(.small)
+                    Text(modelId.components(separatedBy: "/").last ?? modelId)
+                        .font(.subheadline.weight(.medium))
+                    Text("Loading…")
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
+                    Spacer()
+                }
+                .padding(12)
+                .background(.quaternary.opacity(0.3), in: RoundedRectangle(cornerRadius: 10))
+                .padding(.horizontal, 16)
+                .padding(.vertical, 6)
+            }
+
             Divider()
 
             // Content
