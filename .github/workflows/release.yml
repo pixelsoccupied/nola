@@ -1,0 +1,36 @@
+name: Release DMG
+
+on:
+  push:
+    tags: ["v*"]
+
+jobs:
+  build:
+    runs-on: macos-26
+
+    steps:
+      - uses: actions/checkout@v6
+
+      - name: Build release
+        run: |
+          xcodebuild build \
+            -project Nola.xcodeproj \
+            -scheme Nola \
+            -configuration Release \
+            -derivedDataPath build/derived \
+            CODE_SIGNING_ALLOWED=NO \
+            -quiet
+
+      - name: Create DMG
+        run: |
+          hdiutil create \
+            -volname "Nola" \
+            -srcfolder build/derived/Build/Products/Release/Nola.app \
+            -ov -format UDZO \
+            Nola.dmg
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          files: Nola.dmg
+          generate_release_notes: true
