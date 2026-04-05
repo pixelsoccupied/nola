@@ -11,7 +11,7 @@ struct MessageBubble: View {
         HStack(alignment: .top, spacing: 0) {
             if message.role == .user { Spacer(minLength: 60) }
 
-            Text(displayContent)
+            Text(renderedContent)
                 .textSelection(.enabled)
                 .padding(12)
                 .foregroundStyle(message.role == .user ? .white : .primary)
@@ -43,5 +43,17 @@ struct MessageBubble: View {
             return "..."
         }
         return content
+    }
+
+    private var renderedContent: AttributedString {
+        let raw = displayContent
+        // Try markdown parsing; falls back to plain text on failure
+        guard let attributed = try? AttributedString(
+            markdown: raw,
+            options: .init(interpretedSyntax: .inlineOnlyPreservingWhitespace)
+        ) else {
+            return AttributedString(raw)
+        }
+        return attributed
     }
 }
