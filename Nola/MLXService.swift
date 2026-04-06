@@ -173,12 +173,16 @@ final class MLXService {
             try await downloadTask?.value
         } catch is CancellationError {
             mlxLog.info("Download cancelled: \(id)")
-            downloadingModelId = nil
-            downloadingProgress = 0
+            if downloadingModelId == id {
+                downloadingModelId = nil
+                downloadingProgress = 0
+            }
         } catch {
             mlxLog.error("Download failed for \(id): \(error.localizedDescription)")
-            downloadingModelId = nil
-            downloadingProgress = 0
+            if downloadingModelId == id {
+                downloadingModelId = nil
+                downloadingProgress = 0
+            }
             handleLoadError(error, modelId: id)
             throw error
         }
