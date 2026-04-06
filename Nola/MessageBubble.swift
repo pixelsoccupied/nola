@@ -77,37 +77,35 @@ struct MessageBubble: View {
 
     @ViewBuilder
     private var thinkingSection: some View {
-        VStack(alignment: .leading, spacing: 4) {
-            Button {
-                withAnimation(.easeInOut(duration: 0.2)) {
-                    showThinking.toggle()
-                }
-            } label: {
-                HStack(spacing: 6) {
-                    Image(systemName: "lightbulb.fill")
-                        .symbolEffect(.pulse, options: .repeating, isActive: isThinkingLive)
-                    if isThinkingLive, thinkingSecs == nil {
-                        Text("Thinking…")
-                    } else if let secs = thinkingSecs {
-                        Text("Thought for \(formatDuration(secs))")
-                    }
-                    Image(systemName: "chevron.right")
-                        .font(.caption2)
-                        .rotationEffect(.degrees(showThinking || isThinkingLive ? 90 : 0))
-                }
-                .font(.caption)
-                .foregroundStyle(.secondary)
+        HStack(spacing: 6) {
+            Image(systemName: "lightbulb.fill")
+                .symbolEffect(.pulse, options: .repeating, isActive: isThinkingLive)
+            if isThinkingLive, thinkingSecs == nil {
+                Text("Thinking…")
+            } else if let secs = thinkingSecs {
+                Text("Thought for \(formatDuration(secs))")
             }
-            .buttonStyle(.plain)
-            .padding(.leading, 14)
-
-            if showThinking || isThinkingLive, let text = thinkingText, !text.isEmpty {
-                Text(renderMarkdown(text))
-                    .textSelection(.enabled)
-                    .font(.callout)
-                    .foregroundStyle(.secondary)
-                    .padding(.horizontal, 14)
-                    .padding(.vertical, 4)
+            Image(systemName: showThinking ? "chevron.down" : "chevron.right")
+                .font(.caption2)
+        }
+        .font(.caption)
+        .foregroundStyle(.secondary)
+        .padding(.leading, 14)
+        .contentShape(Rectangle())
+        .onTapGesture { showThinking.toggle() }
+        .popover(isPresented: $showThinking, arrowEdge: .bottom) {
+            if let text = thinkingText, !text.isEmpty {
+                ScrollView {
+                    Text(renderMarkdown(text))
+                        .textSelection(.enabled)
+                        .font(.callout)
+                        .foregroundStyle(.secondary)
+                        .padding(16)
+                        .frame(maxWidth: .infinity, alignment: .leading)
+                        .contentTransition(.numericText())
+                        .animation(.easeIn(duration: 0.15), value: text)
+                }
+                .frame(width: 480, height: 300)
             }
         }
     }

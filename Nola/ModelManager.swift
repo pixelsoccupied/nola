@@ -17,7 +17,8 @@ final class ModelManager {
         let id: String
         let path: URL
         let sizeBytes: Int64
-        let supportsThinking: Bool
+        let supportsThinking: Bool      // model may emit <think> tags
+        let thinkingControllable: Bool   // has enable_thinking flag (user can toggle)
 
         var displayName: String {
             id.components(separatedBy: "/").last ?? id
@@ -80,8 +81,8 @@ final class ModelManager {
 
             seenIds.insert(modelId)
             let size = directorySize(at: modelPath)
-            let thinking = hasThinkingSupport(at: modelPath)
-            models.append(DownloadedModel(id: modelId, path: modelPath, sizeBytes: size, supportsThinking: thinking))
+            let (thinks, controllable) = detectThinking(at: modelPath)
+            models.append(DownloadedModel(id: modelId, path: modelPath, sizeBytes: size, supportsThinking: thinks, thinkingControllable: controllable))
         }
         return models.sorted { $0.id < $1.id }
     }
@@ -116,20 +117,22 @@ final class ModelManager {
         return total
     }
 
-    nonisolated private static func hasThinkingSupport(at modelPath: URL) -> Bool {
+    /// Returns (supportsThinking, thinkingControllable).
+    /// - supportsThinking: model may emit <think> tags (for parser)
+    /// - thinkingControllable: has enable_thinking flag (user can toggle on/off)
+    nonisolated private static func detectThinking(at modelPath: URL) -> (Bool, Bool) {
         let fm = FileManager.default
         let snapshotsDir = modelPath.appendingPathComponent("snapshots")
         guard let snapshots = try? fm.contentsOfDirectory(atPath: snapshotsDir.path),
-              let hash = snapshots.first else { return false }
+              let hash = snapshots.first else { return (false, false) }
 
         let snapshotDir = snapshotsDir.appendingPathComponent(hash)
 
         // Check chat_template.jinja first (preferred by swift-transformers)
-        // Models support thinking if they use enable_thinking flag OR always emit <think>
         let jinjaFile = snapshotDir.appendingPathComponent("chat_template.jinja")
         if let content = try? String(contentsOf: jinjaFile, encoding: .utf8),
            content.contains("<think>") {
-            return true
+            return (true, content.contains("enable_thinking"))
         }
 
         // Fall back to tokenizer_config.json chat_template field
@@ -138,9 +141,9 @@ final class ModelManager {
            let json = try? JSONSerialization.jsonObject(with: data) as? [String: Any],
            let template = json["chat_template"] as? String,
            template.contains("<think>") {
-            return true
+            return (true, template.contains("enable_thinking"))
         }
 
-        return false
+        return (false, false)
     }
 }

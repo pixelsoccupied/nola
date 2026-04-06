@@ -133,7 +133,7 @@ struct ThinkingToggleButton: View {
 
     private var modelSupportsThinking: Bool {
         guard let id = mlxService.activeModelId else { return false }
-        return modelManager.mlxModels.first { $0.id == id }?.supportsThinking ?? false
+        return modelManager.mlxModels.first { $0.id == id }?.thinkingControllable ?? false
     }
 
     var body: some View {
