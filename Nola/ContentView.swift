@@ -69,6 +69,9 @@ struct ContentView: View {
             }
             // Trailing — LLM controls
             ToolbarItem(placement: .automatic) {
+                PluginToolbarButton()
+            }
+            ToolbarItem(placement: .automatic) {
                 ThinkingToggleButton(chatViewModel: chatViewModel)
             }
             ToolbarItem(placement: .automatic) {

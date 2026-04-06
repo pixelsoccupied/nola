@@ -11,6 +11,7 @@
 		EC2DAF142F80896300957914 /* MLXLMCommon in Frameworks */ = {isa = PBXBuildFile; productRef = EC2DAF132F80896300957914 /* MLXLMCommon */; };
 		EC2DAF162F80898B00957914 /* MLXEmbedders in Frameworks */ = {isa = PBXBuildFile; productRef = EC2DAF152F80898B00957914 /* MLXEmbedders */; };
 		EC2DAF182F80898B00957914 /* MLXVLM in Frameworks */ = {isa = PBXBuildFile; productRef = EC2DAF172F80898B00957914 /* MLXVLM */; };
+		EC4A00102FA0000100957914 /* MCP in Frameworks */ = {isa = PBXBuildFile; productRef = EC4A00302FA0000100957914 /* MCP */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -63,6 +64,7 @@
 				EC2DAF162F80898B00957914 /* MLXEmbedders in Frameworks */,
 				EC2DAF142F80896300957914 /* MLXLMCommon in Frameworks */,
 				EC2DAF182F80898B00957914 /* MLXVLM in Frameworks */,
+				EC4A00102FA0000100957914 /* MCP in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -135,6 +137,7 @@
 				EC2DAF132F80896300957914 /* MLXLMCommon */,
 				EC2DAF152F80898B00957914 /* MLXEmbedders */,
 				EC2DAF172F80898B00957914 /* MLXVLM */,
+				EC4A00302FA0000100957914 /* MCP */,
 			);
 			productName = Nola;
 			productReference = EC23A99A2F80747700802F50 /* Nola.app */;
@@ -220,6 +223,7 @@
 			minimizedProjectReferenceProxies = 1;
 			packageReferences = (
 				EC2DAEE12F8086B900957914 /* XCRemoteSwiftPackageReference "mlx-swift-lm" */,
+				EC4A00202FA0000100957914 /* XCRemoteSwiftPackageReference "swift-sdk" */,
 			);
 			preferredProjectObjectVersion = 77;
 			productRefGroup = EC23A99B2F80747700802F50 /* Products */;
@@ -611,6 +615,14 @@
 				minimumVersion = 2.31.3;
 			};
 		};
+		EC4A00202FA0000100957914 /* XCRemoteSwiftPackageReference "swift-sdk" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/modelcontextprotocol/swift-sdk";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 0.11.0;
+			};
+		};
 /* End XCRemoteSwiftPackageReference section */
 
 /* Begin XCSwiftPackageProductDependency section */
@@ -633,6 +645,11 @@
 			isa = XCSwiftPackageProductDependency;
 			package = EC2DAEE12F8086B900957914 /* XCRemoteSwiftPackageReference "mlx-swift-lm" */;
 			productName = MLXVLM;
+		};
+		EC4A00302FA0000100957914 /* MCP */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = EC4A00202FA0000100957914 /* XCRemoteSwiftPackageReference "swift-sdk" */;
+			productName = MCP;
 		};
 /* End XCSwiftPackageProductDependency section */
 	};

@@ -3,6 +3,8 @@ import SwiftData
 import SwiftUI
 
 class AppDelegate: NSObject, NSApplicationDelegate {
+    var onTerminate: (() -> Void)?
+
     func applicationDidFinishLaunching(_ notification: Notification) {
         NSApp.setActivationPolicy(.regular)
         NSApp.activate(ignoringOtherApps: true)
@@ -11,6 +13,10 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     func applicationDidBecomeActive(_ notification: Notification) {
         NSApp.windows.first?.makeKeyAndOrderFront(nil)
     }
+
+    func applicationWillTerminate(_ notification: Notification) {
+        onTerminate?()
+    }
 }
 
 @main
@@ -18,12 +24,19 @@ struct NolaApp: App {
     @NSApplicationDelegateAdaptor(AppDelegate.self) var appDelegate
     @State private var mlxService = MLXService()
     @State private var modelManager = ModelManager()
+    @State private var mcpService = MCPService()
 
     var body: some Scene {
         WindowGroup {
             ContentView()
                 .environment(mlxService)
                 .environment(modelManager)
+                .environment(mcpService)
+                .onAppear {
+                    appDelegate.onTerminate = { [mcpService] in
+                        mcpService.shutdownAll()
+                    }
+                }
         }
         .modelContainer(for: [Conversation.self, Message.self])
         .commands {

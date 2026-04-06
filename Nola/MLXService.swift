@@ -5,6 +5,7 @@ import MLXLLM
 import MLXLMCommon
 import os
 import SwiftUI
+import Tokenizers
 
 private let mlxLog = Logger(subsystem: "com.nola.app", category: "MLXService")
 
@@ -222,14 +223,16 @@ final class MLXService {
         messages: [Chat.Message],
         container: ModelContainer,
         enableThinking: Bool = false,
+        tools: [ToolSpec]? = nil,
         maxTokens: Int = 2048,
         temperature: Float = 0.7
-    ) -> AsyncThrowingStream<String, Error> {
+    ) -> AsyncThrowingStream<Generation, Error> {
         AsyncThrowingStream { continuation in
             let task = Task {
                 do {
                     let userInput = UserInput(
                         chat: messages,
+                        tools: tools,
                         additionalContext: ["enable_thinking": enableThinking]
                     )
                     let parameters = GenerateParameters(
@@ -243,9 +246,7 @@ final class MLXService {
 
                     for await generation in stream {
                         try Task.checkCancellation()
-                        if let chunk = generation.chunk {
-                            continuation.yield(chunk)
-                        }
+                        continuation.yield(generation)
                     }
                     continuation.finish()
                 } catch is CancellationError {

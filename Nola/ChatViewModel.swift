@@ -14,6 +14,7 @@ final class ChatViewModel {
     var thinkingEnabled = false
     var isThinking = false
     var thinkingElapsed: Double = 0
+    var toolCallActivity: [ToolCallRecord] = []
 
     private var generationTask: Task<Void, Never>?
     private var rawAccumulator = ""
@@ -21,6 +22,19 @@ final class ChatViewModel {
     private var thinkingStartTime: ContinuousClock.Instant?
     private var thinkingDuration: Duration?
     private var modelSupportsThinking = false
+
+    struct ToolCallRecord: Identifiable {
+        let id = UUID()
+        let name: String
+        let arguments: String
+        var status: Status
+
+        enum Status {
+            case running
+            case completed(String)
+            case failed(String)
+        }
+    }
 
     struct GenerationError {
         let message: String
@@ -52,6 +66,7 @@ final class ChatViewModel {
         conversation: Conversation,
         mlxService: MLXService,
         modelContext: SwiftData.ModelContext,
+        mcpService: MCPService? = nil,
         modelSupportsThinking supportsThinking: Bool = false
     ) {
         guard let container = mlxService.container else { return }
@@ -72,25 +87,98 @@ final class ChatViewModel {
         thinkingDuration = nil
         modelSupportsThinking = supportsThinking
         generationError = nil
+        toolCallActivity = []
 
         conversation.modelId = mlxService.activeModelId
-        let chatMessages = buildChatMessages(from: conversation)
+        var chatMessages = buildChatMessages(from: conversation)
         let thinking = thinkingEnabled
+        let hasEnabledPlugins = mcpService?.enabledPlugins.isEmpty == false
 
         generationTask = Task {
             let startTime = ContinuousClock.now
             var tokenCount = 0
+            var toolRound = 0
+            let maxToolRounds = 3
+
+            // Start MCP servers if any plugins are enabled, then collect tools
+            if hasEnabledPlugins {
+                await mcpService?.ensureServersRunning()
+            }
+            let toolSpecs = mcpService?.isAnyPluginReady == true ? mcpService?.allToolSpecs : nil
+
             do {
-                let stream = mlxService.generate(
-                    messages: chatMessages,
-                    container: container,
-                    enableThinking: thinking
-                )
-                for try await chunk in stream {
-                    tokenCount += 1
-                    processChunk(chunk)
+                // Generation loop — restarts after tool calls
+                generateLoop: while toolRound <= maxToolRounds {
+                    var pendingToolCalls: [ToolCall] = []
+
+                    let stream = mlxService.generate(
+                        messages: chatMessages,
+                        container: container,
+                        enableThinking: thinking,
+                        tools: toolSpecs
+                    )
+                    for try await generation in stream {
+                        switch generation {
+                        case .chunk(let chunk):
+                            tokenCount += 1
+                            processChunk(chunk)
+                        case .toolCall(let toolCall):
+                            pendingToolCalls.append(toolCall)
+                        case .info:
+                            break
+                        }
+                    }
+
+                    // No tool calls — generation is done
+                    if pendingToolCalls.isEmpty {
+                        break generateLoop
+                    }
+
+                    // Execute tool calls and feed results back
+                    guard let mcp = mcpService else { break generateLoop }
+                    toolRound += 1
+
+                    for toolCall in pendingToolCalls {
+                        let argsJSON = toolCall.function.arguments.mapValues { "\($0)" }
+                        let argsString = (try? String(
+                            data: JSONSerialization.data(
+                                withJSONObject: argsJSON, options: .fragmentsAllowed),
+                            encoding: .utf8)) ?? "{}"
+
+                        let record = ToolCallRecord(
+                            name: toolCall.function.name,
+                            arguments: argsString,
+                            status: .running
+                        )
+                        toolCallActivity.append(record)
+                        let recordIndex = toolCallActivity.count - 1
+
+                        do {
+                            let result = try await mcp.callTool(
+                                name: toolCall.function.name,
+                                arguments: toolCall.function.arguments
+                            )
+                            toolCallActivity[recordIndex].status = .completed(result)
+                            chatMessages.append(.tool(result))
+                        } catch {
+                            let errMsg = error.localizedDescription
+                            toolCallActivity[recordIndex].status = .failed(errMsg)
+                            chatMessages.append(.tool("Error: \(errMsg)"))
+                        }
+                    }
+
+                    // Reset streaming state for next generation pass
+                    rawAccumulator = ""
+                    streamingContent = ""
+                    isInThinkingPhase = false
+                    thinkingDuration = nil
                 }
 
+                // If response is empty but we had tool calls, show a fallback
+                if streamingContent.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
+                    && !toolCallActivity.isEmpty {
+                    streamingContent = "Tool calls completed but the model didn't generate a response. Try rephrasing your question."
+                }
                 assistantMessage.content = streamingContent
                 if !streamingThinkingContent.isEmpty {
                     assistantMessage.thinkingContent = streamingThinkingContent
@@ -101,6 +189,11 @@ final class ChatViewModel {
                 assistantMessage.generationSeconds = Double(seconds) + Double(attoseconds) / 1e18
                 assistantMessage.tokenCount = tokenCount
                 assistantMessage.memoryBytesUsed = Memory.activeMemory + Memory.cacheMemory
+
+                // Persist tool call records
+                if !toolCallActivity.isEmpty {
+                    assistantMessage.toolCallsJSON = encodeToolCalls(toolCallActivity)
+                }
             } catch {
                 if Task.isCancelled {
                     assistantMessage.content = streamingContent + " [Cancelled]"
@@ -122,6 +215,24 @@ final class ChatViewModel {
         }
     }
 
+    private func encodeToolCalls(_ records: [ToolCallRecord]) -> String? {
+        struct Encoded: Codable {
+            let name: String
+            let arguments: String
+            let result: String?
+            let error: String?
+        }
+        let encoded = records.map { record in
+            switch record.status {
+            case .running: return Encoded(name: record.name, arguments: record.arguments, result: nil, error: nil)
+            case .completed(let r): return Encoded(name: record.name, arguments: record.arguments, result: r, error: nil)
+            case .failed(let e): return Encoded(name: record.name, arguments: record.arguments, result: nil, error: e)
+            }
+        }
+        guard let data = try? JSONEncoder().encode(encoded) else { return nil }
+        return String(data: data, encoding: .utf8)
+    }
+
     private func processChunk(_ chunk: String) {
         rawAccumulator += chunk
 
@@ -140,7 +251,6 @@ final class ChatViewModel {
                 let (s, a) = thinkingDuration!.components
                 thinkingElapsed = Double(s) + Double(a) / 1e18
             }
-            // Final thinking content (strip <think> tag if present)
             var thinking = String(rawAccumulator[..<endRange.lowerBound])
             if let tagRange = thinking.range(of: "<think>") {
                 thinking = String(thinking[tagRange.upperBound...])
@@ -157,7 +267,6 @@ final class ChatViewModel {
                 isThinking = true
                 if thinkingStartTime == nil { thinkingStartTime = .now }
             }
-            // Update live thinking content for display
             var thinking = rawAccumulator
             if let tagRange = thinking.range(of: "<think>") {
                 thinking = String(thinking[tagRange.upperBound...])

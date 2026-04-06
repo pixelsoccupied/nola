@@ -4,6 +4,7 @@ import SwiftUI
 struct ChatView: View {
     @Environment(MLXService.self) private var mlxService
     @Environment(ModelManager.self) private var modelManager
+    @Environment(MCPService.self) private var mcpService
     @Environment(\.modelContext) private var modelContext
     @Environment(\.colorScheme) private var colorScheme
 
@@ -219,6 +220,7 @@ struct ChatView: View {
             conversation: conversation,
             mlxService: mlxService,
             modelContext: modelContext,
+            mcpService: mcpService,
             modelSupportsThinking: supportsThinking
         )
     }
@@ -237,7 +239,8 @@ private struct StreamingMessageBubble: View {
             contentOverride: chatViewModel.streamingContent.isEmpty ? nil : chatViewModel.streamingContent,
             isThinkingLive: chatViewModel.isThinking,
             thinkingContentOverride: chatViewModel.streamingThinkingContent.isEmpty ? nil : chatViewModel.streamingThinkingContent,
-            thinkingSecondsOverride: chatViewModel.thinkingElapsed > 0 ? chatViewModel.thinkingElapsed : nil
+            thinkingSecondsOverride: chatViewModel.thinkingElapsed > 0 ? chatViewModel.thinkingElapsed : nil,
+            toolCallsOverride: chatViewModel.toolCallActivity.isEmpty ? nil : chatViewModel.toolCallActivity
         )
     }
 }

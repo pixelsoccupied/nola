@@ -24,6 +24,9 @@ final class Message {
     var thinkingContent: String?
     var thinkingSeconds: Double?
 
+    // Tool calls (persisted as JSON)
+    var toolCallsJSON: String?
+
     var tokensPerSecond: Double? {
         guard let tokens = tokenCount, let seconds = generationSeconds, seconds > 0 else { return nil }
         return Double(tokens) / seconds
